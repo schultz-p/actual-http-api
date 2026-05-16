@@ -4,6 +4,7 @@ const express = require('express');
 const yaml = require('js-yaml');
 
 const v1Routes = require("./src/v1/routes");
+const { authorizeRequest } = require('./src/v1/middlewares/api-key-authorization');
 
 const app = express();
 
@@ -19,15 +20,15 @@ app.use(function(err, req, res, next) {
 
 const swaggerUi = require('swagger-ui-express');
 const { openapiSpecification } = require('./src/config/swagger');
-app.use('/api-docs', swaggerUi.serve);
+app.use('/api-docs', authorizeRequest, swaggerUi.serve);
 // Workaround to allow user to download swagger.json file
-app.get('/api-docs', swaggerUi.setup(null, {
+app.get('/api-docs', authorizeRequest, swaggerUi.setup(null, {
   swaggerOptions: {
     url: '/api-docs/swagger.json'
   }
 }));
-app.get('/api-docs/swagger.json', (req, res) => res.json(openapiSpecification));
-app.get('/api-docs/swagger.yaml', (req, res) => {
+app.get('/api-docs/swagger.json', authorizeRequest, (req, res) => res.json(openapiSpecification));
+app.get('/api-docs/swagger.yaml', authorizeRequest, (req, res) => {
   res.type('yaml').send(yaml.dump(openapiSpecification));
 });
 
