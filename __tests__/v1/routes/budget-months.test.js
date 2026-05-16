@@ -212,6 +212,19 @@ describe('Budget Months Routes', () => {
       );
     });
 
+    it('should handle errors from getMonthCategories', async () => {
+      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+      budgetMonthsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories'];
+      const error = new Error('failed');
+      mockBudget.getMonthCategories = jest.fn().mockRejectedValue(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
     it('should return month categories', async () => {
       const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
       budgetMonthsModule(mockRouter);
@@ -255,6 +268,32 @@ describe('Budget Months Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         data: expect.objectContaining({ id: 'cat1' }),
       });
+    });
+
+    it('should call next with error when getMonthCategory throws', async () => {
+      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+      budgetMonthsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
+      const error = new Error('db error');
+      mockBudget.getMonthCategory = jest.fn().mockRejectedValue(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+      expect(mockRes.json).not.toHaveBeenCalled();
+    });
+
+    it('should call next with not-found error when category is null', async () => {
+      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+      budgetMonthsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
+      mockBudget.getMonthCategory = jest.fn().mockResolvedValue(null);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.objectContaining({ message: 'Category not found' }));
     });
   });
 
@@ -304,6 +343,21 @@ describe('Budget Months Routes', () => {
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
+
+    it('should call next with not-found error when category does not exist', async () => {
+      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+      budgetMonthsModule(mockRouter);
+
+      const handler = handlers['PATCH /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
+      mockReq.params.month = '2023-08';
+      mockReq.params.categoryId = 'cat1';
+      mockReq.body = { category: { budgeted: 100 } };
+      mockBudget.getMonthCategory = jest.fn().mockResolvedValue(null);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.objectContaining({ message: 'Category not found' }));
+    });
   });
 
   describe('GET /budgets/:budgetSyncId/months/:month/categorygroups', () => {
@@ -337,6 +391,19 @@ describe('Budget Months Routes', () => {
         ]),
       });
     });
+
+    it('should handle errors from getMonthCategoryGroups', async () => {
+      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+      budgetMonthsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups'];
+      const error = new Error('failed');
+      mockBudget.getMonthCategoryGroups = jest.fn().mockRejectedValue(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('GET /budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId', () => {
@@ -369,6 +436,32 @@ describe('Budget Months Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         data: expect.objectContaining({ id: 'grp1' }),
       });
+    });
+
+    it('should call next with error when getMonthCategoryGroup throws', async () => {
+      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+      budgetMonthsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId'];
+      const error = new Error('db error');
+      mockBudget.getMonthCategoryGroup = jest.fn().mockRejectedValue(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+      expect(mockRes.json).not.toHaveBeenCalled();
+    });
+
+    it('should call next with not-found error when category group is null', async () => {
+      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+      budgetMonthsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId'];
+      mockBudget.getMonthCategoryGroup = jest.fn().mockResolvedValue(null);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.objectContaining({ message: 'Category group not found' }));
     });
   });
 
@@ -451,6 +544,19 @@ describe('Budget Months Routes', () => {
         message: 'Budget amount 500 was put on hold for next month',
       });
     });
+
+    it('should handle errors from holdBudgetForNextMonth', async () => {
+      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+      budgetMonthsModule(mockRouter);
+
+      const handler = handlers['POST /budgets/:budgetSyncId/months/:month/nextmonthbudgethold'];
+      const error = new Error('failed');
+      mockBudget.holdBudgetForNextMonth = jest.fn().mockRejectedValue(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('DELETE /budgets/:budgetSyncId/months/:month/nextmonthbudgethold', () => {
@@ -479,6 +585,19 @@ describe('Budget Months Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         message: 'Budget hold reset',
       });
+    });
+
+    it('should handle errors from resetBudgetHold', async () => {
+      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+      budgetMonthsModule(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/months/:month/nextmonthbudgethold'];
+      const error = new Error('failed');
+      mockBudget.resetBudgetHold = jest.fn().mockRejectedValue(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 });
