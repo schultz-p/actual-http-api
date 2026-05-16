@@ -95,6 +95,11 @@ describe('Utils', () => {
     it('should return false for non-empty string', () => {
       expect(isEmpty('test')).toBe(false);
     });
+
+    it('should return true for object with only inherited properties', () => {
+      const obj = Object.create({ inherited: true });
+      expect(isEmpty(obj)).toBe(true);
+    });
   });
 
   describe('listSubDirectories', () => {
