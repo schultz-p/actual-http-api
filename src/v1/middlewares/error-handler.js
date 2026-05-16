@@ -9,7 +9,7 @@ function serverError(res, error, message) {
   res.status(500).json({"error": message});
 }
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, _next) => {
   if (err.type == 'PostError'
     && (err.message.includes('Not Allowed')
       || err.message.includes('network-failure'))) {

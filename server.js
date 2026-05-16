@@ -13,7 +13,7 @@ app.use(express.json());
 app.use("/v1", v1Routes);
 
 // Catch-all error handler
-app.use(function(err, req, res, next) {
+app.use(function(err, req, res, _next) {
   console.log('Internal server error:', err);
   res.status(err.status || 500).json({"error": "Internal server error"});
 });
@@ -42,7 +42,7 @@ app.listen(config.port, () => {
  * for an nonexisting account would make the app crash. Preventing this by capturing
  * the unhandled rejection errors and ignoring them if they come from @actual-app/api
  */
-function ignoreUnhandledRejectionsCausedByActualApiLibrary(reason, promise) {
+function ignoreUnhandledRejectionsCausedByActualApiLibrary(reason, _promise) {
   if (isErrorComingFromActualApi(reason) && !doesActualErrorRequiresRestartingTheHttpService(reason)) {
     console.log('Ignoring unhandledRejection caused by Actual api library');
     return;

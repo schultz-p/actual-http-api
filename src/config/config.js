@@ -8,7 +8,7 @@ const loadMandatorySecret = (name) => {
     try {
       return fs.readFileSync(path, "utf8").trim();
     } catch (err) {
-      throw new Error(`Failed to read secret file at ${path}: ${err.message}`);
+      throw new Error(`Failed to read secret file at ${path}: ${err.message}`, { cause: err });
     }
   }
   throw new Error(`Missing required secret: ${name} or ${name}_PATH`);

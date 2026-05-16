@@ -362,7 +362,7 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
       directories.forEach(subDir => {
         if (fs.existsSync(path.join(actualDataDir, subDir, 'metadata.json'))) {
           const metadataRawContent = getFileContent(path.join(actualDataDir, subDir, 'metadata.json'));
-          if (!!metadataRawContent) {
+          if (metadataRawContent) {
             const metadata = JSON.parse(metadataRawContent);
             syncIdToBudgetId[metadata.groupId] = metadata.id;
           }
