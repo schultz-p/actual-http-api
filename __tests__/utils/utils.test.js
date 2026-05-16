@@ -204,6 +204,10 @@ describe('Utils', () => {
       expect(result).toHaveLength(25);
       expect(result).toEqual(testArray);
     });
+
+    it('should return empty array when input is empty', () => {
+      expect(paginate([], 1, 10)).toEqual([]);
+    });
   });
 
   describe('validatePaginationParameters', () => {
