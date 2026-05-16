@@ -1,4 +1,4 @@
-const { isEmpty, paginate, validatePaginationParameters } = require('../../utils/utils');
+const { isEmpty, paginate, validatePaginationParameters, validateAccountExists } = require('../../utils/utils');
 
 /**
  * @swagger
@@ -198,7 +198,7 @@ module.exports = (router) => {
       if (!req.query.since_date) {
         throw new Error('since_date query parameter is required');
       }
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       let allTransactions = await res.locals.budget.getTransactions(req.params.accountId, req.query.since_date, req.query.until_date);
       if (req.query.page || req.query.limit) {
         validatePaginationParameters(req);
@@ -215,7 +215,7 @@ module.exports = (router) => {
   router.post('/budgets/:budgetSyncId/accounts/:accountId/transactions', async (req, res, next) => {
     try {
       validateTransactionBody(req.body.transaction);
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       res.json({'message': await res.locals.budget.addTransaction(req.params.accountId, req.body.transaction, {
           learnCategories: req.body.learnCategories || false,
           runTransfers: req.body.runTransfers || false,
@@ -286,7 +286,7 @@ module.exports = (router) => {
   router.post('/budgets/:budgetSyncId/accounts/:accountId/transactions/batch', async (req, res, next) => {
     try {
       validateTransactionsArray(req.body.transactions);
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       res.json({'message': await res.locals.budget.addTransactions(req.params.accountId, req.body.transactions, {
           learnCategories: req.body.learnCategories || false,
           runTransfers: req.body.runTransfers || false,
@@ -389,7 +389,7 @@ module.exports = (router) => {
   router.post('/budgets/:budgetSyncId/accounts/:accountId/transactions/import', async (req, res, next) => {
     try {
       validateTransactionsArray(req.body.transactions);
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       const options = {
         defaultCleared: req.body.defaultCleared ?? true,
         dryRun: req.body.dryRun ?? false,
@@ -565,13 +565,6 @@ module.exports = (router) => {
       next(err);
     }
   });
-
-  async function validateAccountExists(res, accountId) {
-    const account = await res.locals.budget.getAccount(accountId);
-    if (!account) {
-      throw new Error('Account not found');
-    }
-  }
 
   function validateTransactionBody(transaction) {
     if (isEmpty(transaction)) {

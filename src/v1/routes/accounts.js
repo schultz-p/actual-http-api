@@ -1,5 +1,5 @@
 
-const { isEmpty, formatDateToISOString } = require('../../utils/utils');
+const { isEmpty, formatDateToISOString, validateAccountExists } = require('../../utils/utils');
 
 /**
  * @swagger
@@ -428,7 +428,7 @@ module.exports = (router) => {
    */
   router.patch('/budgets/:budgetSyncId/accounts/:accountId', async (req, res, next) => {
     try {
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       validateAccountBody(req.body.account);
       await res.locals.budget.updateAccount(req.params.accountId, req.body.account);
       res.json({'message': 'Account updated'});
@@ -439,7 +439,7 @@ module.exports = (router) => {
   
   router.delete('/budgets/:budgetSyncId/accounts/:accountId', async (req, res, next) => {
     try {
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       await res.locals.budget.deleteAccount(req.params.accountId);
       res.json({'message': 'Account deleted'});
     } catch(err) {
@@ -500,7 +500,7 @@ module.exports = (router) => {
    */
   router.put('/budgets/:budgetSyncId/accounts/:accountId/close', async (req, res, next) => {
     try {
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       await res.locals.budget.closeAccount(req.params.accountId, req.body?.transfer || {});
       res.json({'message': 'Account closed'});
     } catch(err) {
@@ -610,13 +610,6 @@ module.exports = (router) => {
       next(err);
     }
   });
-
-  async function validateAccountExists(res, accountId) {
-    const account = await res.locals.budget.getAccount(accountId);
-    if (!account) {
-      throw new Error('Account not found');
-    }
-  }
 
   function validateAccountBody(account) {
     if (isEmpty(account)) {

@@ -56,6 +56,13 @@ exports.paginate = (array, page, limit) => {
   return array.slice(startIndex, startIndex + limit);
 }
 
+exports.validateAccountExists = async (budget, accountId) => {
+  const account = await budget.getAccount(accountId);
+  if (!account) {
+    throw new Error('Account not found');
+  }
+}
+
 exports.validatePaginationParameters = (req) => {
   if (!req.query.limit) {
     throw new Error('limit query parameter is required when using pagination');
