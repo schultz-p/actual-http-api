@@ -74,6 +74,19 @@ describe('Notes Routes', () => {
       });
     });
 
+    it('should handle errors from getCategoryNotes', async () => {
+      const error = new Error('failed');
+      mockBudget.getCategoryNotes.mockRejectedValueOnce(error);
+
+      const module = require('../../../src/v1/routes/notes');
+      module(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/notes/category/:categoryId'];
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
     it('should return empty string when notes are null', async () => {
       mockBudget.getCategoryNotes.mockResolvedValueOnce(null);
 
@@ -131,6 +144,19 @@ describe('Notes Routes', () => {
       });
     });
 
+    it('should handle errors from getAccountNotes', async () => {
+      const error = new Error('failed');
+      mockBudget.getAccountNotes.mockRejectedValueOnce(error);
+
+      const module = require('../../../src/v1/routes/notes');
+      module(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/notes/account/:accountId'];
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
   });
 
   describe('GET /budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth', () => {
@@ -169,6 +195,19 @@ describe('Notes Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         data: ""
       });
+    });
+
+    it('should handle errors from getBudgetMonthNotes', async () => {
+      const error = new Error('failed');
+      mockBudget.getBudgetMonthNotes.mockRejectedValueOnce(error);
+
+      const module = require('../../../src/v1/routes/notes');
+      module(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth'];
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
 
   });
@@ -243,6 +282,38 @@ describe('Notes Routes', () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
 
+    it('should return 501 when experimental operations are disabled', async () => {
+      const module = require('../../../src/v1/routes/notes');
+      const configModule = require('../../../src/config/config');
+      module(mockRouter);
+
+      const handler = handlers['PUT /budgets/:budgetSyncId/notes/category/:categoryId'];
+      const original = configModule.config.experimentalOperationsEnabled;
+      configModule.config.experimentalOperationsEnabled = false;
+
+      mockReq.body = { data: 'note' };
+      await handler(mockReq, mockRes, mockNext);
+      configModule.config.experimentalOperationsEnabled = original;
+
+      expect(mockRes.status).toHaveBeenCalledWith(501);
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from setCategoryNotes', async () => {
+      const error = new Error('write failed');
+      mockBudget.setCategoryNotes.mockRejectedValueOnce(error);
+
+      const module = require('../../../src/v1/routes/notes');
+      module(mockRouter);
+
+      const handler = handlers['PUT /budgets/:budgetSyncId/notes/category/:categoryId'];
+      mockReq.body = { data: 'note' };
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
   });
 
   describe('DELETE /budgets/:budgetSyncId/notes/category/:categoryId', () => {
@@ -279,6 +350,22 @@ describe('Notes Routes', () => {
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
+    it('should return 501 when experimental operations are disabled', async () => {
+      const module = require('../../../src/v1/routes/notes');
+      const configModule = require('../../../src/config/config');
+      module(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/notes/category/:categoryId'];
+      const original = configModule.config.experimentalOperationsEnabled;
+      configModule.config.experimentalOperationsEnabled = false;
+
+      await handler(mockReq, mockRes, mockNext);
+      configModule.config.experimentalOperationsEnabled = original;
+
+      expect(mockRes.status).toHaveBeenCalledWith(501);
+      expect(mockNext).not.toHaveBeenCalled();
     });
 
   });
@@ -319,6 +406,38 @@ describe('Notes Routes', () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
 
+    it('should return 501 when experimental operations are disabled', async () => {
+      const module = require('../../../src/v1/routes/notes');
+      const configModule = require('../../../src/config/config');
+      module(mockRouter);
+
+      const handler = handlers['PUT /budgets/:budgetSyncId/notes/account/:accountId'];
+      const original = configModule.config.experimentalOperationsEnabled;
+      configModule.config.experimentalOperationsEnabled = false;
+
+      mockReq.body = { data: 'note' };
+      await handler(mockReq, mockRes, mockNext);
+      configModule.config.experimentalOperationsEnabled = original;
+
+      expect(mockRes.status).toHaveBeenCalledWith(501);
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from setAccountNotes', async () => {
+      const error = new Error('write failed');
+      mockBudget.setAccountNotes.mockRejectedValueOnce(error);
+
+      const module = require('../../../src/v1/routes/notes');
+      module(mockRouter);
+
+      const handler = handlers['PUT /budgets/:budgetSyncId/notes/account/:accountId'];
+      mockReq.body = { data: 'note' };
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
   });
 
   describe('DELETE /budgets/:budgetSyncId/notes/account/:accountId', () => {
@@ -339,6 +458,35 @@ describe('Notes Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         message: 'Account notes deleted'
       });
+    });
+
+    it('should return 501 when experimental operations are disabled', async () => {
+      const module = require('../../../src/v1/routes/notes');
+      const configModule = require('../../../src/config/config');
+      module(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/notes/account/:accountId'];
+      const original = configModule.config.experimentalOperationsEnabled;
+      configModule.config.experimentalOperationsEnabled = false;
+
+      await handler(mockReq, mockRes, mockNext);
+      configModule.config.experimentalOperationsEnabled = original;
+
+      expect(mockRes.status).toHaveBeenCalledWith(501);
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from setAccountNotes on delete', async () => {
+      const error = new Error('delete failed');
+      mockBudget.setAccountNotes.mockRejectedValueOnce(error);
+
+      const module = require('../../../src/v1/routes/notes');
+      module(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/notes/account/:accountId'];
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
 
   });
@@ -379,6 +527,38 @@ describe('Notes Routes', () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
 
+    it('should return 501 when experimental operations are disabled', async () => {
+      const module = require('../../../src/v1/routes/notes');
+      const configModule = require('../../../src/config/config');
+      module(mockRouter);
+
+      const handler = handlers['PUT /budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth'];
+      const original = configModule.config.experimentalOperationsEnabled;
+      configModule.config.experimentalOperationsEnabled = false;
+
+      mockReq.body = { data: 'note' };
+      await handler(mockReq, mockRes, mockNext);
+      configModule.config.experimentalOperationsEnabled = original;
+
+      expect(mockRes.status).toHaveBeenCalledWith(501);
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from setBudgetMonthNotes', async () => {
+      const error = new Error('write failed');
+      mockBudget.setBudgetMonthNotes.mockRejectedValueOnce(error);
+
+      const module = require('../../../src/v1/routes/notes');
+      module(mockRouter);
+
+      const handler = handlers['PUT /budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth'];
+      mockReq.body = { data: 'note' };
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
   });
 
   describe('DELETE /budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth', () => {
@@ -399,6 +579,35 @@ describe('Notes Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         message: 'Budget month notes deleted'
       });
+    });
+
+    it('should return 501 when experimental operations are disabled', async () => {
+      const module = require('../../../src/v1/routes/notes');
+      const configModule = require('../../../src/config/config');
+      module(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth'];
+      const original = configModule.config.experimentalOperationsEnabled;
+      configModule.config.experimentalOperationsEnabled = false;
+
+      await handler(mockReq, mockRes, mockNext);
+      configModule.config.experimentalOperationsEnabled = original;
+
+      expect(mockRes.status).toHaveBeenCalledWith(501);
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from setBudgetMonthNotes on delete', async () => {
+      const error = new Error('delete failed');
+      mockBudget.setBudgetMonthNotes.mockRejectedValueOnce(error);
+
+      const module = require('../../../src/v1/routes/notes');
+      module(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth'];
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
 
   });
