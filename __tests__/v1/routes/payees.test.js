@@ -163,6 +163,19 @@ describe('Payees Routes', () => {
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
+
+    it('should treat null getPayees response as empty list', async () => {
+      const payeesModule = require('../../../src/v1/routes/payees');
+      payeesModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/payees/:payeeId'];
+      mockReq.params.payeeId = 'payee1';
+      mockBudget.getPayees.mockResolvedValueOnce(null);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+    });
   });
 
   describe('POST /budgets/:budgetSyncId/payees', () => {
@@ -331,6 +344,19 @@ describe('Payees Routes', () => {
           expect.objectContaining({ id: 'rule1' }),
         ]),
       });
+    });
+
+    it('should handle errors from getPayeeRules', async () => {
+      const payeesModule = require('../../../src/v1/routes/payees');
+      payeesModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/payees/:payeeId/rules'];
+      const error = new Error('failed');
+      mockBudget.getPayeeRules = jest.fn().mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 

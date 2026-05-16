@@ -555,6 +555,19 @@ describe('Transactions Routes', () => {
         message: 'Transaction deleted',
       });
     });
+
+    it('should handle errors from deleteTransaction', async () => {
+      const transactionsModule = require('../../../src/v1/routes/transactions');
+      transactionsModule(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/transactions/:transactionId'];
+      const error = new Error('failed');
+      mockBudget.deleteTransaction.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('DELETE /budgets/:budgetSyncId/transactions/batch', () => {
@@ -651,6 +664,19 @@ describe('Transactions Routes', () => {
       };
       const error = new Error('Transaction not found');
       mockBudget.updateTransaction.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
+    it('should handle errors from deleteTransactions (batch)', async () => {
+      const transactionsModule = require('../../../src/v1/routes/transactions');
+      transactionsModule(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/transactions/batch'];
+      const error = new Error('failed');
+      mockBudget.deleteTransactions.mockRejectedValueOnce(error);
 
       await handler(mockReq, mockRes, mockNext);
 

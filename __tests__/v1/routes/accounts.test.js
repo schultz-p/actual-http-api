@@ -309,7 +309,7 @@ describe('Accounts Routes', () => {
         .mockResolvedValueOnce({ data: 0 })
         .mockResolvedValueOnce({ data: [
           { date: '2023-08-01', amount: 1000 },
-          { date: '2023-08-02', amount: 100 },
+          { date: '2023-08-02', amount: 0 },    // zero amount exercises row.amount || 0 branch
           { date: '2023-08-03', amount: -50 },
         ] });
 
@@ -318,8 +318,30 @@ describe('Accounts Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         data: expect.objectContaining({
           '2023-08-01': 1000,
-          '2023-08-02': 1100,
-          '2023-08-03': 1050,
+          '2023-08-02': 1000,
+          '2023-08-03': 950,
+        }),
+      });
+    });
+
+    it('should use non-zero starting balance and handle null grouped data', async () => {
+      const accountsModule = require('../../../src/v1/routes/accounts');
+      accountsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/accounts/:accountId/balancehistory'];
+      mockReq.params.accountId = 'acc1';
+      mockReq.query.since_date = '2023-08-01';
+      mockReq.query.until_date = '2023-08-02';
+      mockBudget.runQuery
+        .mockResolvedValueOnce({ data: 500 })   // non-zero starting balance (truthy branch of line 74)
+        .mockResolvedValueOnce({ data: null });  // null grouped data (falsy branch of line 86 → || [])
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          '2023-08-01': 500,
+          '2023-08-02': 500,
         }),
       });
     });

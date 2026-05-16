@@ -125,6 +125,24 @@ describe('Run Query Routes', () => {
       });
     });
 
+    it('should wrap a single filter object in an array', async () => {
+      const runQueryModule = require('../../../src/v1/routes/run-query');
+      runQueryModule(mockRouter);
+
+      const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
+      const queryParams = {
+        table: 'transactions',
+        filter: { date: { $gte: '2021-01-01' } },  // single object, not an array
+      };
+      mockReq.body = { ActualQLquery: queryParams };
+
+      await handler(mockReq, mockRes, mockNext);
+
+      const mockQuery = mockBudget.q.mock.results[0].value;
+      expect(mockQuery.filter).toHaveBeenCalledTimes(1);
+      expect(mockQuery.filter).toHaveBeenCalledWith({ date: { $gte: '2021-01-01' } });
+    });
+
     it('should support withDead and withoutValidatedRefs flags', async () => {
       const runQueryModule = require('../../../src/v1/routes/run-query');
       runQueryModule(mockRouter);
@@ -232,6 +250,23 @@ describe('Run Query Routes', () => {
       await handler(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
+    it('should return 501 when experimental operations are disabled', async () => {
+      const runQueryModule = require('../../../src/v1/routes/run-query');
+      const configModule = require('../../../src/config/config');
+      runQueryModule(mockRouter);
+
+      const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
+      const original = configModule.config.experimentalOperationsEnabled;
+      configModule.config.experimentalOperationsEnabled = false;
+
+      mockReq.body = { ActualQLquery: { table: 'transactions' } };
+      await handler(mockReq, mockRes, mockNext);
+      configModule.config.experimentalOperationsEnabled = original;
+
+      expect(mockRes.status).toHaveBeenCalledWith(501);
+      expect(mockNext).not.toHaveBeenCalled();
     });
   });
 });

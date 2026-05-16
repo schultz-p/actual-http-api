@@ -10,7 +10,7 @@ jest.mock('../../src/config/config.js', () => ({
 jest.mock('dotenv');
 jest.mock('../../src/v1/actual-client-provider');
 jest.mock('../../src/utils/utils');
-jest.mock('archiver');
+jest.mock('archiver', () => jest.fn());
 jest.mock('fs');
 jest.mock('path');
 

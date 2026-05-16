@@ -176,6 +176,19 @@ describe('Rules Routes', () => {
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
+
+    it('should treat null getRules response as empty list', async () => {
+      const rulesModule = require('../../../src/v1/routes/rules');
+      rulesModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/rules/:ruleId'];
+      mockReq.params.ruleId = 'rule1';
+      mockBudget.getRules.mockResolvedValueOnce(null);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+    });
   });
 
   describe('POST /budgets/:budgetSyncId/rules', () => {
@@ -301,6 +314,19 @@ describe('Rules Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         message: 'Rule deleted',
       });
+    });
+
+    it('should handle errors from deleteRule', async () => {
+      const rulesModule = require('../../../src/v1/routes/rules');
+      rulesModule(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/rules/:ruleId'];
+      const error = new Error('failed');
+      mockBudget.deleteRule.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 });
