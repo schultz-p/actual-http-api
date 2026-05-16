@@ -14,6 +14,8 @@ const loadMandatorySecret = (name) => {
   throw new Error(`Missing required secret: ${name} or ${name}_PATH`);
 }
 
+// dotenv is a dev dependency; only load it outside production.
+// In production, env vars are expected to be injected by the runtime.
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
