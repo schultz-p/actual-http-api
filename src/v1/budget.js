@@ -216,14 +216,14 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
       if (!fromMonthCategory) {
         throw new Error(`Source category not found: ${fromCategoryId}`);
       }
-      updateMonthCategory(month, fromCategoryId, { budgeted: fromMonthCategory.budgeted - amount });
+      await updateMonthCategory(month, fromCategoryId, { budgeted: fromMonthCategory.budgeted - amount });
     }
     if (toCategoryId) {
       const toMonthCategory = await getMonthCategory(month, toCategoryId);
       if (!toMonthCategory) {
         throw new Error(`Destination category not found: ${toCategoryId}`);
       }
-      updateMonthCategory(month, toCategoryId, { budgeted: toMonthCategory.budgeted + amount });
+      await updateMonthCategory(month, toCategoryId, { budgeted: toMonthCategory.budgeted + amount });
     }
   }
 
