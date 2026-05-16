@@ -140,9 +140,9 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
 
   async function deleteTransactions(transactionIds = []) {
     return actualApi.batchBudgetUpdates(async () => {
-      transactionIds.forEach(async (transactionId) => {
+      for (const transactionId of transactionIds) {
         await actualApi.deleteTransaction(transactionId);
-      });
+      }
     });
   }
 
