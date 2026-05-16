@@ -107,6 +107,81 @@ describe('Settings Routes', () => {
     });
   });
 
+  describe('GET /actualhttpapiversion', () => {
+    it('should register the route', () => {
+      const settingsModule = require('../../../src/v1/routes/settings');
+      settingsModule(mockRouter);
+
+      expect(mockRouter.get).toHaveBeenCalledWith('/actualhttpapiversion', expect.any(Function));
+    });
+
+    it('should return the package version', async () => {
+      const settingsModule = require('../../../src/v1/routes/settings');
+      settingsModule(mockRouter);
+
+      const handler = handlers['GET /actualhttpapiversion'];
+      const pkg = require('../../../package.json');
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalledWith({ data: { version: pkg.version } });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('GET /budgets/:budgetSyncId/actualserverversion', () => {
+    it('should register the route', () => {
+      const settingsModule = require('../../../src/v1/routes/settings');
+      settingsModule(mockRouter);
+
+      expect(mockRouter.get).toHaveBeenCalledWith(
+        '/budgets/:budgetSyncId/actualserverversion',
+        expect.any(Function)
+      );
+    });
+
+    it('should return the server version', async () => {
+      const settingsModule = require('../../../src/v1/routes/settings');
+      settingsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/actualserverversion'];
+      mockBudget.getServerVersion = jest.fn().mockResolvedValue({ version: '26.5.0' });
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockBudget.getServerVersion).toHaveBeenCalled();
+      expect(mockRes.json).toHaveBeenCalledWith({ data: { version: '26.5.0' } });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should call next with an error when response contains an error field', async () => {
+      const settingsModule = require('../../../src/v1/routes/settings');
+      settingsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/actualserverversion'];
+      mockBudget.getServerVersion = jest.fn().mockResolvedValue({ error: 'server unavailable' });
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.stringContaining('server unavailable') })
+      );
+    });
+
+    it('should call next with an error when getServerVersion throws', async () => {
+      const settingsModule = require('../../../src/v1/routes/settings');
+      settingsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/actualserverversion'];
+      const error = new Error('connection refused');
+      mockBudget.getServerVersion = jest.fn().mockRejectedValue(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+  });
+
   describe('GET /budgets/:budgetSyncId/export', () => {
     it('should register the route', () => {
       const settingsModule = require('../../../src/v1/routes/settings');
@@ -175,6 +250,76 @@ describe('Settings Routes', () => {
         'Content-Disposition',
         expect.stringContaining('attachment')
       );
+    });
+
+    it('should return 501 when experimental operations are disabled', async () => {
+      const settingsModule = require('../../../src/v1/routes/settings');
+      const configModule = require('../../../src/config/config');
+      settingsModule(mockRouter);
+
+      const original = configModule.config.experimentalOperationsEnabled;
+      configModule.config.experimentalOperationsEnabled = false;
+
+      const handler = handlers['GET /budgets/:budgetSyncId/export'];
+      await handler(mockReq, mockRes, mockNext);
+
+      configModule.config.experimentalOperationsEnabled = original;
+
+      expect(mockRes.status).toHaveBeenCalledWith(501);
+      expect(mockRes.json).toHaveBeenCalledWith(
+        expect.objectContaining({ error: expect.any(String) })
+      );
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should send 500 via fileStream error callback when headers are not sent', async () => {
+      const settingsModule = require('../../../src/v1/routes/settings');
+      settingsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/export'];
+      let errorCallback;
+      const mockFileStream = {
+        pipe: jest.fn().mockReturnThis(),
+        finalize: jest.fn(),
+        on: jest.fn((event, cb) => { if (event === 'error') errorCallback = cb; }),
+      };
+      mockBudget.exportData = jest.fn().mockResolvedValueOnce({
+        fileName: 'budget.zip',
+        fileStream: mockFileStream,
+      });
+      mockRes.headersSent = false;
+      mockRes.send = jest.fn();
+
+      await handler(mockReq, mockRes, mockNext);
+      errorCallback(new Error('zip failed'));
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.send).toHaveBeenCalledWith('Failed to generate zip');
+    });
+
+    it('should not send 500 via fileStream error callback when headers are already sent', async () => {
+      const settingsModule = require('../../../src/v1/routes/settings');
+      settingsModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/export'];
+      let errorCallback;
+      const mockFileStream = {
+        pipe: jest.fn().mockReturnThis(),
+        finalize: jest.fn(),
+        on: jest.fn((event, cb) => { if (event === 'error') errorCallback = cb; }),
+      };
+      mockBudget.exportData = jest.fn().mockResolvedValueOnce({
+        fileName: 'budget.zip',
+        fileStream: mockFileStream,
+      });
+      mockRes.headersSent = true;
+      mockRes.send = jest.fn();
+
+      await handler(mockReq, mockRes, mockNext);
+      errorCallback(new Error('zip failed'));
+
+      expect(mockRes.status).not.toHaveBeenCalledWith(500);
+      expect(mockRes.send).not.toHaveBeenCalled();
     });
   });
 });
