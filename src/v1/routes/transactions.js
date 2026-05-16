@@ -216,10 +216,10 @@ module.exports = (router) => {
     try {
       validateTransactionBody(req.body.transaction);
       await validateAccountExists(res.locals.budget, req.params.accountId);
-      res.json({'message': await res.locals.budget.addTransaction(req.params.accountId, req.body.transaction, {
+      res.status(201).json({'message': await res.locals.budget.addTransaction(req.params.accountId, req.body.transaction, {
           learnCategories: req.body.learnCategories || false,
           runTransfers: req.body.runTransfers || false,
-      })}).status(201);
+      })});
     } catch(err) {
       next(err);
     }
@@ -287,10 +287,10 @@ module.exports = (router) => {
     try {
       validateTransactionsArray(req.body.transactions);
       await validateAccountExists(res.locals.budget, req.params.accountId);
-      res.json({'message': await res.locals.budget.addTransactions(req.params.accountId, req.body.transactions, {
+      res.status(201).json({'message': await res.locals.budget.addTransactions(req.params.accountId, req.body.transactions, {
           learnCategories: req.body.learnCategories || false,
           runTransfers: req.body.runTransfers || false,
-        })}).status(201);
+        })});
     } catch(err) {
       next(err);
     }
@@ -395,7 +395,7 @@ module.exports = (router) => {
         dryRun: req.body.dryRun ?? false,
         reimportDeleted: req.body.reimportDeleted ?? false,
       };
-      res.json({'data': await res.locals.budget.importTransactions(req.params.accountId, req.body.transactions, options)}).status(201);
+      res.status(201).json({'data': await res.locals.budget.importTransactions(req.params.accountId, req.body.transactions, options)});
     } catch(err) {
       next(err);
     }
