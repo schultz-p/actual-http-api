@@ -126,6 +126,19 @@ describe('Categories Routes', () => {
         ]),
       });
     });
+
+    it('should handle errors from getCategories', async () => {
+      const categoriesModule = require('../../../src/v1/routes/categories');
+      categoriesModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/categories'];
+      const error = new Error('failed');
+      mockBudget.getCategories.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('GET /budgets/:budgetSyncId/categories/:categoryId', () => {
@@ -330,6 +343,65 @@ describe('Categories Routes', () => {
         ]),
       });
     });
+
+    it('should handle errors from getCategoryGroups', async () => {
+      const categoriesModule = require('../../../src/v1/routes/categories');
+      categoriesModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/categorygroups'];
+      const error = new Error('failed');
+      mockBudget.getCategoryGroups.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
+    it('should treat null getCategoryGroups response as empty list', async () => {
+      const categoriesModule = require('../../../src/v1/routes/categories');
+      categoriesModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/categorygroups'];
+      mockBudget.getCategoryGroups.mockResolvedValueOnce(null);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalledWith({ data: [] });
+    });
+
+    it('should transform nested categories within each group', async () => {
+      const categoriesModule = require('../../../src/v1/routes/categories');
+      categoriesModule(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/categorygroups'];
+      mockBudget.getCategoryGroups.mockResolvedValueOnce([{
+        id: 'grp1',
+        name: 'Expenses',
+        is_income: 0,
+        tombstone: 0,
+        hidden: 0,
+        categories: [{
+          id: 'cat1',
+          name: 'Groceries',
+          is_income: 0,
+          tombstone: 0,
+          hidden: 0,
+        }],
+      }]);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        data: expect.arrayContaining([
+          expect.objectContaining({
+            id: 'grp1',
+            categories: expect.arrayContaining([
+              expect.objectContaining({ id: 'cat1' }),
+            ]),
+          }),
+        ]),
+      });
+    });
   });
 
   describe('POST /budgets/:budgetSyncId/categorygroups', () => {
@@ -361,6 +433,33 @@ describe('Categories Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         data: expect.objectContaining({ id: 'new-grp' }),
       });
+    });
+
+    it('should reject without category_group property', async () => {
+      const categoriesModule = require('../../../src/v1/routes/categories');
+      categoriesModule(mockRouter);
+
+      const handler = handlers['POST /budgets/:budgetSyncId/categorygroups'];
+      mockReq.body = {};
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockBudget.createCategoryGroup).not.toHaveBeenCalled();
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('should handle errors from createCategoryGroup', async () => {
+      const categoriesModule = require('../../../src/v1/routes/categories');
+      categoriesModule(mockRouter);
+
+      const handler = handlers['POST /budgets/:budgetSyncId/categorygroups'];
+      mockReq.body = { category_group: { name: 'New Group' } };
+      const error = new Error('failed');
+      mockBudget.createCategoryGroup.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 
@@ -394,6 +493,20 @@ describe('Categories Routes', () => {
         message: 'Category group updated',
       });
     });
+
+    it('should handle errors from updateCategoryGroup', async () => {
+      const categoriesModule = require('../../../src/v1/routes/categories');
+      categoriesModule(mockRouter);
+
+      const handler = handlers['PATCH /budgets/:budgetSyncId/categorygroups/:categoryGroupId'];
+      mockReq.body = { category_group: { name: 'Updated Group' } };
+      const error = new Error('failed');
+      mockBudget.updateCategoryGroup.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('DELETE /budgets/:budgetSyncId/categorygroups/:categoryGroupId', () => {
@@ -423,6 +536,19 @@ describe('Categories Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         message: 'Category group deleted',
       });
+    });
+
+    it('should handle errors from deleteCategoryGroup', async () => {
+      const categoriesModule = require('../../../src/v1/routes/categories');
+      categoriesModule(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/categorygroups/:categoryGroupId'];
+      const error = new Error('failed');
+      mockBudget.deleteCategoryGroup.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 });
