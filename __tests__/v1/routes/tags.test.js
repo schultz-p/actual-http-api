@@ -87,6 +87,19 @@ describe('Tags Routes', () => {
       });
     });
 
+    it('should handle errors from getTags', async () => {
+      const module = require('../../../src/v1/routes/tags');
+      module(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/tags'];
+      const error = new Error('failed');
+      mockBudget.getTags.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
   });
 
   describe('GET /budgets/:budgetSyncId/tags/:tagId', () => {
@@ -120,6 +133,20 @@ describe('Tags Routes', () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
 
+    it('should treat null getTags response as empty list', async () => {
+      const module = require('../../../src/v1/routes/tags');
+      module(mockRouter);
+
+      const handler = handlers['GET /budgets/:budgetSyncId/tags/:tagId'];
+
+      mockReq.params.tagId = 'tag1';
+      mockBudget.getTags.mockResolvedValueOnce(null);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+    });
+
   });
 
   describe('POST /budgets/:budgetSyncId/tags', () => {
@@ -141,6 +168,19 @@ describe('Tags Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         data: expect.objectContaining({ id: 'new-tag' })
       });
+    });
+
+    it('should handle errors from createTag', async () => {
+      const module = require('../../../src/v1/routes/tags');
+      module(mockRouter);
+
+      const handler = handlers['POST /budgets/:budgetSyncId/tags'];
+      const error = new Error('failed');
+      mockBudget.createTag.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
 
   });
@@ -167,6 +207,19 @@ describe('Tags Routes', () => {
       });
     });
 
+    it('should handle errors from updateTag', async () => {
+      const module = require('../../../src/v1/routes/tags');
+      module(mockRouter);
+
+      const handler = handlers['PATCH /budgets/:budgetSyncId/tags/:tagId'];
+      const error = new Error('failed');
+      mockBudget.updateTag.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
+
   });
 
   describe('DELETE /budgets/:budgetSyncId/tags/:tagId', () => {
@@ -186,6 +239,19 @@ describe('Tags Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         message: 'Tag deleted'
       });
+    });
+
+    it('should handle errors from deleteTag', async () => {
+      const module = require('../../../src/v1/routes/tags');
+      module(mockRouter);
+
+      const handler = handlers['DELETE /budgets/:budgetSyncId/tags/:tagId'];
+      const error = new Error('failed');
+      mockBudget.deleteTag.mockRejectedValueOnce(error);
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
 
   });
