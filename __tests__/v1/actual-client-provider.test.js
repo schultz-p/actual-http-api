@@ -115,5 +115,40 @@ describe('Actual Client Provider', () => {
         password: 'password',
       });
     });
+
+    it('should shut down and clear the client after the TTL expires', async () => {
+      const fs = require('fs');
+      fs.existsSync = jest.fn().mockReturnValue(true);
+      const mockActualApi = {
+        init: jest.fn().mockResolvedValue(undefined),
+        shutdown: jest.fn().mockResolvedValue(undefined),
+      };
+      jest.doMock('@actual-app/api', () => mockActualApi);
+
+      await provider.getActualApiClient();
+      expect(mockActualApi.shutdown).not.toHaveBeenCalled();
+
+      // Advance past the 1-hour TTL
+      await jest.advanceTimersByTimeAsync(60 * 60 * 1000);
+
+      expect(mockActualApi.shutdown).toHaveBeenCalledTimes(1);
+    });
+
+    it('should re-initialize the client after TTL invalidation', async () => {
+      const fs = require('fs');
+      fs.existsSync = jest.fn().mockReturnValue(true);
+      const mockActualApi = {
+        init: jest.fn().mockResolvedValue(undefined),
+        shutdown: jest.fn().mockResolvedValue(undefined),
+      };
+      jest.doMock('@actual-app/api', () => mockActualApi);
+
+      await provider.getActualApiClient();
+      await jest.advanceTimersByTimeAsync(60 * 60 * 1000);
+
+      // Client should re-initialize on next call after invalidation
+      await provider.getActualApiClient();
+      expect(mockActualApi.init).toHaveBeenCalledTimes(2);
+    });
   });
 });
