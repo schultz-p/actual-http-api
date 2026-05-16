@@ -23,9 +23,8 @@ describe('API Key Authorization Middleware', () => {
   });
 
   describe('authorizeRequest', () => {
-    it('should call next() if API key matches in production', async () => {
+    it('should call next() if API key matches', async () => {
       config.apiKey = 'valid-key';
-      config.nodeEnv = 'production';
       req.get.mockReturnValue('valid-key');
 
       await authorizeRequest(req, res, next);
@@ -34,50 +33,26 @@ describe('API Key Authorization Middleware', () => {
       expect(res.status).not.toHaveBeenCalled();
     });
 
-    it('should return 403 if API key is invalid in production', async () => {
+    it('should return 401 if API key is invalid', async () => {
       config.apiKey = 'valid-key';
-      config.nodeEnv = 'production';
       req.get.mockReturnValue('invalid-key');
 
       await authorizeRequest(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden' });
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Unauthorized' });
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('should return 403 if API key is missing in production', async () => {
+    it('should return 401 if API key is missing', async () => {
       config.apiKey = 'valid-key';
-      config.nodeEnv = 'production';
       req.get.mockReturnValue(null);
 
       await authorizeRequest(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden' });
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Unauthorized' });
       expect(next).not.toHaveBeenCalled();
-    });
-
-    it('should call next() regardless of API key in non-production', async () => {
-      config.apiKey = 'valid-key';
-      config.nodeEnv = 'development';
-      req.get.mockReturnValue('invalid-key');
-
-      await authorizeRequest(req, res, next);
-
-      expect(next).toHaveBeenCalled();
-      expect(res.status).not.toHaveBeenCalled();
-    });
-
-    it('should call next() with no API key in non-production', async () => {
-      config.apiKey = 'valid-key';
-      config.nodeEnv = 'development';
-      req.get.mockReturnValue(null);
-
-      await authorizeRequest(req, res, next);
-
-      expect(next).toHaveBeenCalled();
-      expect(res.status).not.toHaveBeenCalled();
     });
   });
 });
