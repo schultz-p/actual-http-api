@@ -8,12 +8,14 @@ const loadMandatorySecret = (name) => {
     try {
       return fs.readFileSync(path, "utf8").trim();
     } catch (err) {
-      throw new Error(`Failed to read secret file at ${path}: ${err.message}`);
+      throw new Error(`Failed to read secret file at ${path}: ${err.message}`, { cause: err });
     }
   }
   throw new Error(`Missing required secret: ${name} or ${name}_PATH`);
 }
 
+// dotenv is a dev dependency; only load it outside production.
+// In production, env vars are expected to be injected by the runtime.
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
@@ -34,6 +36,7 @@ exports.config = {
     basePath: process.env.SWAGGER_BASE_PATH || "v1",
     customConfigProvided: !!(process.env.SWAGGER_PROTOCOL || process.env.SWAGGER_HOST || process.env.SWAGGER_PORT || process.env.SWAGGER_BASE_PATH),
   },
-  // Toggle to enable experimental / unofficial operations. Default: enabled (true).
-  experimentalOperationsEnabled: (process.env.EXPERIMENTAL_OPERATIONS_ENABLED === 'false' && process.env.NODE_ENV != 'test') ? false : true,
+  // Experimental/unofficial operations are enabled by default; set EXPERIMENTAL_OPERATIONS_ENABLED=false to disable.
+  // The test environment always has them enabled so tests don't need to set the variable.
+  experimentalOperationsEnabled: process.env.EXPERIMENTAL_OPERATIONS_ENABLED !== 'false' || process.env.NODE_ENV === 'test',
 };

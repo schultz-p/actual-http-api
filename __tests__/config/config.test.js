@@ -110,4 +110,32 @@ describe('Configuration', () => {
       expect(cfg.actual.serverPassword).toBe('password');
     });
   });
+
+  describe('experimentalOperationsEnabled', () => {
+    beforeEach(() => {
+      process.env.API_KEY = 'test-api-key';
+      process.env.ACTUAL_SERVER_PASSWORD = 'password';
+    });
+
+    it('is enabled by default', () => {
+      delete process.env.EXPERIMENTAL_OPERATIONS_ENABLED;
+      process.env.NODE_ENV = 'production';
+      const { config: cfg } = require('../../src/config/config');
+      expect(cfg.experimentalOperationsEnabled).toBe(true);
+    });
+
+    it('is disabled when set to false in production', () => {
+      process.env.EXPERIMENTAL_OPERATIONS_ENABLED = 'false';
+      process.env.NODE_ENV = 'production';
+      const { config: cfg } = require('../../src/config/config');
+      expect(cfg.experimentalOperationsEnabled).toBe(false);
+    });
+
+    it('is always enabled in test regardless of the flag', () => {
+      process.env.EXPERIMENTAL_OPERATIONS_ENABLED = 'false';
+      process.env.NODE_ENV = 'test';
+      const { config: cfg } = require('../../src/config/config');
+      expect(cfg.experimentalOperationsEnabled).toBe(true);
+    });
+  });
 });

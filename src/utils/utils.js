@@ -42,23 +42,25 @@ exports.parseNumericBoolean = (numericBoolean) => {
 }
 
 exports.paginate = (array, page, limit) => {
-  const totalTransactions = array.length;
-  // Ensure the limit number is greater than 0
   if (limit < 1) {
     throw new Error(`Limit query parameter must be greater than 0`);
   }
-  const numOfPages = Math.ceil(totalTransactions / limit);
-  // Ensure the page number is within bounds
+  if (array.length === 0) {
+    return [];
+  }
+  const numOfPages = Math.ceil(array.length / limit);
   if (page < 1 || page > numOfPages) {
     throw new Error(`Page query parameter must be between 1 and ${numOfPages}. Changing limit parameter can also change the number of pages.`);
   }
-  const selectedPage = Math.min(page, numOfPages);
-  // Calculate the total number of pages
-  const startIndex = (selectedPage - 1) * limit;
-  const endIndex = startIndex + limit;
-  // Slice the transactions for the current page
-  const paginatedTransactions = array.slice(startIndex, endIndex);
-  return paginatedTransactions
+  const startIndex = (page - 1) * limit;
+  return array.slice(startIndex, startIndex + limit);
+}
+
+exports.validateAccountExists = async (budget, accountId) => {
+  const account = await budget.getAccount(accountId);
+  if (!account) {
+    throw new Error('Account not found');
+  }
 }
 
 exports.validatePaginationParameters = (req) => {

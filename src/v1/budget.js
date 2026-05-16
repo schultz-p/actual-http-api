@@ -140,9 +140,9 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
 
   async function deleteTransactions(transactionIds = []) {
     return actualApi.batchBudgetUpdates(async () => {
-      transactionIds.forEach(async (transactionId) => {
+      for (const transactionId of transactionIds) {
         await actualApi.deleteTransaction(transactionId);
-      });
+      }
     });
   }
 
@@ -216,14 +216,14 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
       if (!fromMonthCategory) {
         throw new Error(`Source category not found: ${fromCategoryId}`);
       }
-      updateMonthCategory(month, fromCategoryId, { budgeted: fromMonthCategory.budgeted - amount });
+      await updateMonthCategory(month, fromCategoryId, { budgeted: fromMonthCategory.budgeted - amount });
     }
     if (toCategoryId) {
       const toMonthCategory = await getMonthCategory(month, toCategoryId);
       if (!toMonthCategory) {
         throw new Error(`Destination category not found: ${toCategoryId}`);
       }
-      updateMonthCategory(month, toCategoryId, { budgeted: toMonthCategory.budgeted + amount });
+      await updateMonthCategory(month, toCategoryId, { budgeted: toMonthCategory.budgeted + amount });
     }
   }
 
@@ -362,7 +362,7 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
       directories.forEach(subDir => {
         if (fs.existsSync(path.join(actualDataDir, subDir, 'metadata.json'))) {
           const metadataRawContent = getFileContent(path.join(actualDataDir, subDir, 'metadata.json'));
-          if (!!metadataRawContent) {
+          if (metadataRawContent) {
             const metadata = JSON.parse(metadataRawContent);
             syncIdToBudgetId[metadata.groupId] = metadata.id;
           }

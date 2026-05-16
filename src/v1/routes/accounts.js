@@ -1,5 +1,5 @@
 
-const { isEmpty, formatDateToISOString } = require('../../utils/utils');
+const { isEmpty, formatDateToISOString, validateAccountExists } = require('../../utils/utils');
 
 /**
  * @swagger
@@ -56,6 +56,47 @@ const { isEmpty, formatDateToISOString } = require('../../utils/utils');
  *     Amount:
  *       type: integer
  */
+
+async function computeBalanceHistory(budget, accountId, start, end) {
+  const q = budget.q;
+  const startStr = formatDateToISOString(start);
+  const endStr = formatDateToISOString(end);
+
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const beforeStart = new Date(start.getTime() - DAY_MS);
+  const beforeStartStr = formatDateToISOString(beforeStart);
+
+  const startBalanceRes = await budget.runQuery(
+    q('transactions')
+      .filter({ account: accountId, is_parent: false, tombstone: false, date: { $lte: beforeStartStr } })
+      .calculate({ $sum: '$amount' })
+  );
+  const startingBalance = startBalanceRes && startBalanceRes.data ? startBalanceRes.data : 0;
+
+  const groupedRes = await budget.runQuery(
+    q('transactions')
+      .filter({ account: accountId, is_parent: false, tombstone: false, date: [{ $gte: startStr }, { $lte: endStr }] })
+      .groupBy('date')
+      .orderBy('date')
+      .select(['date', { amount: { $sum: '$amount' } }])
+  );
+
+  const groupedData = (groupedRes && groupedRes.data) || [];
+  const sumsByDate = {};
+  groupedData.forEach((row) => { sumsByDate[row.date] = row.amount || 0; });
+
+  const result = {};
+  let cumulative = startingBalance;
+  let current = new Date(start.getTime());
+  const endDate = new Date(end.getTime());
+  while (current <= endDate) {
+    const d = formatDateToISOString(current);
+    cumulative = cumulative + (sumsByDate[d] || 0);
+    result[d] = cumulative;
+    current = new Date(current.getTime() + DAY_MS);
+  }
+  return result;
+}
 
 module.exports = (router) => {
   /**
@@ -242,50 +283,6 @@ module.exports = (router) => {
       if (isNaN(start) || isNaN(end) || start > end) {
         throw new Error('Invalid date range');
       }
-      // Delegate to helper that mirrors the compare script's Actual-QL method.
-      async function computeBalanceHistory(budget, accountId, start, end) {
-        const q = budget.q;
-        const startStr = formatDateToISOString(start);
-        const endStr = formatDateToISOString(end);
-
-        // compute day-before-start using simple date arithmetic and utility formatter
-        const DAY_MS = 24 * 60 * 60 * 1000;
-        const beforeStart = new Date(start.getTime() - DAY_MS);
-        const beforeStartStr = formatDateToISOString(beforeStart);
-
-        const startBalanceRes = await budget.runQuery(
-          q('transactions')
-            .filter({ account: accountId, is_parent: false, tombstone: false, date: { $lte: beforeStartStr } })
-            .calculate({ $sum: '$amount' })
-        );
-        const startingBalance = startBalanceRes && startBalanceRes.data ? startBalanceRes.data : 0;
-
-        const groupedRes = await budget.runQuery(
-          q('transactions')
-            .filter({ account: accountId, is_parent: false, tombstone: false, date: [{ $gte: startStr }, { $lte: endStr }] })
-            .groupBy('date')
-            .orderBy('date')
-            .select(['date', { amount: { $sum: '$amount' } }])
-        );
-
-        const groupedData = (groupedRes && groupedRes.data) || [];
-        const sumsByDate = {};
-        groupedData.forEach((row) => { sumsByDate[row.date] = row.amount || 0; });
-
-        const result = {};
-        let cumulative = startingBalance;
-        // iterate by day using utility formatter for date keys
-        let current = new Date(start.getTime());
-        const endDate = new Date(end.getTime());
-        while (current <= endDate) {
-          const d = formatDateToISOString(current);
-          cumulative = cumulative + (sumsByDate[d] || 0);
-          result[d] = cumulative;
-          current = new Date(current.getTime() + DAY_MS);
-        }
-        return result;
-      }
-
       const dailyBalance = await computeBalanceHistory(res.locals.budget, req.params.accountId, start, end);
       res.json({ data: dailyBalance });
     } catch(err) {
@@ -428,7 +425,7 @@ module.exports = (router) => {
    */
   router.patch('/budgets/:budgetSyncId/accounts/:accountId', async (req, res, next) => {
     try {
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       validateAccountBody(req.body.account);
       await res.locals.budget.updateAccount(req.params.accountId, req.body.account);
       res.json({'message': 'Account updated'});
@@ -439,7 +436,7 @@ module.exports = (router) => {
   
   router.delete('/budgets/:budgetSyncId/accounts/:accountId', async (req, res, next) => {
     try {
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       await res.locals.budget.deleteAccount(req.params.accountId);
       res.json({'message': 'Account deleted'});
     } catch(err) {
@@ -500,7 +497,7 @@ module.exports = (router) => {
    */
   router.put('/budgets/:budgetSyncId/accounts/:accountId/close', async (req, res, next) => {
     try {
-      await validateAccountExists(res, req.params.accountId);
+      await validateAccountExists(res.locals.budget, req.params.accountId);
       await res.locals.budget.closeAccount(req.params.accountId, req.body?.transfer || {});
       res.json({'message': 'Account closed'});
     } catch(err) {
@@ -610,13 +607,6 @@ module.exports = (router) => {
       next(err);
     }
   });
-
-  async function validateAccountExists(res, accountId) {
-    const account = await res.locals.budget.getAccount(accountId);
-    if (!account) {
-      throw new Error('Account not found');
-    }
-  }
 
   function validateAccountBody(account) {
     if (isEmpty(account)) {

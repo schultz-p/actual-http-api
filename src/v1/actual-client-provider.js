@@ -1,7 +1,10 @@
 const { config } = require('../config/config');
 const { createDirIfDoesNotExist } = require('../utils/utils');
 
+const CLIENT_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
 let actualApi;
+let invalidationTimer;
 
 function getActualDataDir() {
   createDirIfDoesNotExist(config.actual.dataDir);
@@ -16,11 +19,15 @@ async function initializeActualApiClient() {
       password: config.actual.serverPassword,
   });
   console.log('Actual api client initialized successfully');
+  clearTimeout(invalidationTimer);
+  invalidationTimer = setTimeout(invalidateActualApiClient, CLIENT_CACHE_TTL_MS);
 }
 
 async function invalidateActualApiClient() {
-  await actualApi.shutdown();
-  actualApi = null;
+  if (actualApi) {
+    await actualApi.shutdown();
+    actualApi = null;
+  }
   console.log('Actual api client was shut down successfully');
 }
 
@@ -29,8 +36,6 @@ exports.getActualDataDir = () => getActualDataDir();
 exports.getActualApiClient = async () => {
   if (!actualApi) {
     await initializeActualApiClient();
-    // Invalidating actual api to force closing the budget and downloading it again at least every hour
-    setTimeout(invalidateActualApiClient, 1000 * 60 * 60);
   }
   return actualApi;
 }

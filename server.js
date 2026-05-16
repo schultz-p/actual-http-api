@@ -4,6 +4,7 @@ const express = require('express');
 const yaml = require('js-yaml');
 
 const v1Routes = require("./src/v1/routes");
+const { authorizeRequest } = require('./src/v1/middlewares/api-key-authorization');
 
 const app = express();
 
@@ -12,22 +13,22 @@ app.use(express.json());
 app.use("/v1", v1Routes);
 
 // Catch-all error handler
-app.use(function(err, req, res, next) {
+app.use(function(err, req, res, _next) {
   console.log('Internal server error:', err);
   res.status(err.status || 500).json({"error": "Internal server error"});
 });
 
 const swaggerUi = require('swagger-ui-express');
 const { openapiSpecification } = require('./src/config/swagger');
-app.use('/api-docs', swaggerUi.serve);
+app.use('/api-docs', authorizeRequest, swaggerUi.serve);
 // Workaround to allow user to download swagger.json file
-app.get('/api-docs', swaggerUi.setup(null, {
+app.get('/api-docs', authorizeRequest, swaggerUi.setup(null, {
   swaggerOptions: {
     url: '/api-docs/swagger.json'
   }
 }));
-app.get('/api-docs/swagger.json', (req, res) => res.json(openapiSpecification));
-app.get('/api-docs/swagger.yaml', (req, res) => {
+app.get('/api-docs/swagger.json', authorizeRequest, (req, res) => res.json(openapiSpecification));
+app.get('/api-docs/swagger.yaml', authorizeRequest, (req, res) => {
   res.type('yaml').send(yaml.dump(openapiSpecification));
 });
 
@@ -41,7 +42,7 @@ app.listen(config.port, () => {
  * for an nonexisting account would make the app crash. Preventing this by capturing
  * the unhandled rejection errors and ignoring them if they come from @actual-app/api
  */
-function ignoreUnhandledRejectionsCausedByActualApiLibrary(reason, promise) {
+function ignoreUnhandledRejectionsCausedByActualApiLibrary(reason, _promise) {
   if (isErrorComingFromActualApi(reason) && !doesActualErrorRequiresRestartingTheHttpService(reason)) {
     console.log('Ignoring unhandledRejection caused by Actual api library');
     return;

@@ -371,11 +371,16 @@ describe('Budget Module', () => {
       const transactionIds = ['txn1', 'txn2', 'txn3'];
       await budget.deleteTransactions(transactionIds);
       expect(mockActualApi.batchBudgetUpdates).toHaveBeenCalled();
+      expect(mockActualApi.deleteTransaction).toHaveBeenCalledTimes(3);
+      expect(mockActualApi.deleteTransaction).toHaveBeenCalledWith('txn1');
+      expect(mockActualApi.deleteTransaction).toHaveBeenCalledWith('txn2');
+      expect(mockActualApi.deleteTransaction).toHaveBeenCalledWith('txn3');
     });
 
     it('should handle empty transaction array for deletion', async () => {
       await budget.deleteTransactions([]);
       expect(mockActualApi.batchBudgetUpdates).toHaveBeenCalled();
+      expect(mockActualApi.deleteTransaction).not.toHaveBeenCalled();
     });
   });
 

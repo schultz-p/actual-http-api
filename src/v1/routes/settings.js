@@ -1,5 +1,3 @@
-const zlib = require('zlib');
-const querystring = require('querystring');
 const { getActualApiClient } = require('../actual-client-provider');
 const pkg = require('../../../package.json');
 
@@ -223,7 +221,7 @@ module.exports = (router) => {
       res.setHeader('Content-Disposition', `attachment; filename=${encodeURIComponent(fileName)}`);
       fileStream.pipe(res);
       fileStream.finalize();
-      fileStream.on('error', err => {
+      fileStream.on('error', _err => {
         if (!res.headersSent) res.status(500).send('Failed to generate zip');
       });
     } catch (err) {
