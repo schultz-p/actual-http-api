@@ -1,3 +1,5 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+
 describe('Run Query Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -9,26 +11,6 @@ describe('Run Query Routes', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
-
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-      put: vi.fn((path, handler) => {
-        handlers[`PUT ${path}`] = handler;
-      }),
-    };
 
     const mockQuery = {
       filter: vi.fn().mockReturnThis(),
@@ -50,21 +32,8 @@ describe('Run Query Routes', () => {
       runQuery: vi.fn().mockResolvedValue({ data: { some: 'data' } }),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
 
     const runQueryModule = require('../../../src/v1/routes/run-query');
     runQueryModule(mockRouter);

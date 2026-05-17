@@ -1,4 +1,5 @@
 const actualClientProvider = require('../../../src/v1/actual-client-provider');
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
 
 describe('Settings Routes', () => {
   let mockRouter;
@@ -11,42 +12,15 @@ describe('Settings Routes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-    };
-
     mockBudget = {
-      getSettings: vi.fn().mockResolvedValue({
-        locale: 'en-US',
-        maxMonthsOfHistory: 24,
-      }),
+      getSettings: vi.fn().mockResolvedValue({ locale: 'en-US', maxMonthsOfHistory: 24 }),
       exportBudget: vi.fn().mockResolvedValue('exported-data'),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      setHeader: vi.fn().mockReturnThis(),
-      end: vi.fn(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
+    mockRes.setHeader = vi.fn().mockReturnThis();
+    mockRes.end = vi.fn();
 
     const settingsModule = require('../../../src/v1/routes/settings');
     settingsModule(mockRouter);

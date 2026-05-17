@@ -1,3 +1,5 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+
 describe('Schedules Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -6,72 +8,30 @@ describe('Schedules Routes', () => {
   let mockNext;
   let handlers;
 
+  const scheduleFixture = {
+    id: 'schedule1',
+    name: 'Monthly Rent',
+    next_date: '2024-02-01',
+    completed: false,
+    posts_transaction: true,
+    amount: -150000,
+    amountOp: 'is',
+  };
+
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
 
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-    };
-
     mockBudget = {
-      getSchedules: vi.fn().mockResolvedValue([
-        {
-          id: 'schedule1',
-          name: 'Monthly Rent',
-          next_date: '2024-02-01',
-          completed: false,
-          posts_transaction: true,
-          amount: -150000,
-          amountOp: 'is',
-        },
-      ]),
-      getSchedule: vi.fn().mockResolvedValue({
-        id: 'schedule1',
-        name: 'Monthly Rent',
-        next_date: '2024-02-01',
-        completed: false,
-        posts_transaction: true,
-        amount: -150000,
-        amountOp: 'is',
-      }),
+      getSchedules: vi.fn().mockResolvedValue([scheduleFixture]),
+      getSchedule: vi.fn().mockResolvedValue(scheduleFixture),
       createSchedule: vi.fn().mockResolvedValue('new-schedule-id'),
-      updateSchedule: vi.fn().mockResolvedValue({
-        id: 'schedule1',
-        name: 'Updated Rent',
-        amount: -160000,
-      }),
+      updateSchedule: vi.fn().mockResolvedValue({ id: 'schedule1', name: 'Updated Rent', amount: -160000 }),
       deleteSchedule: vi.fn().mockResolvedValue(undefined),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
 
     const schedulesModule = require('../../../src/v1/routes/schedules');
     schedulesModule(mockRouter);

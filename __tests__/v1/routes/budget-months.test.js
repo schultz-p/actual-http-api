@@ -1,3 +1,5 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+
 describe('Budget Months Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -9,23 +11,6 @@ describe('Budget Months Routes', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
-
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-    };
 
     mockBudget = {
       getMonths: vi.fn().mockResolvedValue(['2023-08', '2023-09', '2023-10']),
@@ -43,70 +28,23 @@ describe('Budget Months Routes', () => {
         categoryGroups: [],
       }),
       getMonthCategories: vi.fn().mockResolvedValue([
-        {
-          id: 'cat1',
-          name: 'Groceries',
-          group_id: 'grp1',
-          budgeted: 500,
-          spent: -300,
-          balance: 200,
-        },
+        { id: 'cat1', name: 'Groceries', group_id: 'grp1', budgeted: 500, spent: -300, balance: 200 },
       ]),
-      getMonthCategory: vi.fn().mockResolvedValue({
-        id: 'cat1',
-        name: 'Groceries',
-        group_id: 'grp1',
-        budgeted: 500,
-        spent: -300,
-        balance: 200,
-      }),
-      updateMonthCategory: vi.fn().mockResolvedValue({
-        id: 'cat1',
-        name: 'Groceries',
-        budgeted: 600,
-      }),
-      getCategoryGroups: vi.fn().mockResolvedValue([
-        {
-          id: 'grp1',
-          name: 'Regular Expenses',
-          is_income: false,
-        },
-      ]),
-      getCategoryGroup: vi.fn().mockResolvedValue({
-        id: 'grp1',
-        name: 'Regular Expenses',
-        is_income: false,
-      }),
-      getMonthCategoryGroups: vi.fn().mockResolvedValue([
-        {
-          id: 'grp1',
-          name: 'Income',
-        },
-      ]),
-      getMonthCategoryGroup: vi.fn().mockResolvedValue({
-        id: 'grp1',
-        name: 'Income',
-      }),
+      getMonthCategory: vi.fn().mockResolvedValue(
+        { id: 'cat1', name: 'Groceries', group_id: 'grp1', budgeted: 500, spent: -300, balance: 200 }
+      ),
+      updateMonthCategory: vi.fn().mockResolvedValue({ id: 'cat1', name: 'Groceries', budgeted: 600 }),
+      getCategoryGroups: vi.fn().mockResolvedValue([{ id: 'grp1', name: 'Regular Expenses', is_income: false }]),
+      getCategoryGroup: vi.fn().mockResolvedValue({ id: 'grp1', name: 'Regular Expenses', is_income: false }),
+      getMonthCategoryGroups: vi.fn().mockResolvedValue([{ id: 'grp1', name: 'Income' }]),
+      getMonthCategoryGroup: vi.fn().mockResolvedValue({ id: 'grp1', name: 'Income' }),
       transferCategory: vi.fn().mockResolvedValue(undefined),
       setMonthBudgetHold: vi.fn().mockResolvedValue(undefined),
       deleteMonthBudgetHold: vi.fn().mockResolvedValue(undefined),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
 
     const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
     budgetMonthsModule(mockRouter);

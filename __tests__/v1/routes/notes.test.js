@@ -1,3 +1,5 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+
 describe('Notes Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -10,20 +12,6 @@ describe('Notes Routes', () => {
     vi.resetModules();
     vi.clearAllMocks();
 
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      put: vi.fn((path, handler) => {
-        handlers[`PUT ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-    };
-
     mockBudget = {
       getCategoryNotes: vi.fn(),
       setCategoryNotes: vi.fn(),
@@ -33,21 +21,8 @@ describe('Notes Routes', () => {
       setBudgetMonthNotes: vi.fn(),
     };
 
-    mockReq = {
-      params: {},
-      body: {},
-      query: {}
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget
-      }
-    };
-
-    mockNext = vi.fn();
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
 
     const module = require('../../../src/v1/routes/notes');
     module(mockRouter);

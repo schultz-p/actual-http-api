@@ -1,3 +1,5 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+
 describe('Accounts Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -10,26 +12,6 @@ describe('Accounts Routes', () => {
     vi.resetModules();
     vi.clearAllMocks();
 
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-      put: vi.fn((path, handler) => {
-        handlers[`PUT ${path}`] = handler;
-      }),
-    };
-
     const aqBuilder = {
       filter() { return this; },
       groupBy() { return this; },
@@ -40,37 +22,13 @@ describe('Accounts Routes', () => {
 
     mockBudget = {
       getAccounts: vi.fn().mockResolvedValue([
-        {
-          id: 'acc1',
-          name: 'Checking',
-          offbudget: false,
-          closed: false,
-        },
-        {
-          id: 'acc2',
-          name: 'Savings',
-          offbudget: false,
-          closed: false,
-        },
+        { id: 'acc1', name: 'Checking', offbudget: false, closed: false },
+        { id: 'acc2', name: 'Savings', offbudget: false, closed: false },
       ]),
-      getAccount: vi.fn().mockResolvedValue({
-        id: 'acc1',
-        name: 'Checking',
-        offbudget: false,
-        closed: false,
-      }),
+      getAccount: vi.fn().mockResolvedValue({ id: 'acc1', name: 'Checking', offbudget: false, closed: false }),
       getAccountBalance: vi.fn().mockResolvedValue(5000),
-      createAccount: vi.fn().mockResolvedValue({
-        id: 'new-acc',
-        name: 'New Account',
-        offbudget: false,
-        closed: false,
-      }),
-      updateAccount: vi.fn().mockResolvedValue({
-        id: 'acc1',
-        name: 'Checking Updated',
-        offbudget: false,
-      }),
+      createAccount: vi.fn().mockResolvedValue({ id: 'new-acc', name: 'New Account', offbudget: false, closed: false }),
+      updateAccount: vi.fn().mockResolvedValue({ id: 'acc1', name: 'Checking Updated', offbudget: false }),
       deleteAccount: vi.fn().mockResolvedValue(undefined),
       closeAccount: vi.fn().mockResolvedValue(undefined),
       reopenAccount: vi.fn().mockResolvedValue(undefined),
@@ -79,21 +37,8 @@ describe('Accounts Routes', () => {
       runQuery: vi.fn(),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
 
     const accountsModule = require('../../../src/v1/routes/accounts');
     accountsModule(mockRouter);
