@@ -1,4 +1,4 @@
-const { getActualApiClient } = require('../actual-client-provider');
+const actualClientProvider = require('../actual-client-provider');
 const pkg = require('../../../package.json');
 
 /**
@@ -97,7 +97,7 @@ module.exports = (router) => {
    */
   router.get('/budgets', async (req, res, next) => {
     try {
-      const apiClient = await getActualApiClient();
+      const apiClient = await actualClientProvider.getActualApiClient();
       res.json({ data: await apiClient.getBudgets() });
     } catch (err) {
       next(err);

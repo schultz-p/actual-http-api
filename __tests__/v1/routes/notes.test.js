@@ -7,30 +7,30 @@ describe('Notes Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     handlers = {};
 
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      put: jest.fn((path, handler) => {
+      put: vi.fn((path, handler) => {
         handlers[`PUT ${path}`] = handler;
       }),
-      delete: jest.fn((path, handler) => {
+      delete: vi.fn((path, handler) => {
         handlers[`DELETE ${path}`] = handler;
       }),
     };
 
     mockBudget = {
-      getCategoryNotes: jest.fn(),
-      setCategoryNotes: jest.fn(),
-      getAccountNotes: jest.fn(),
-      setAccountNotes: jest.fn(),
-      getBudgetMonthNotes: jest.fn(),
-      setBudgetMonthNotes: jest.fn(),
+      getCategoryNotes: vi.fn(),
+      setCategoryNotes: vi.fn(),
+      getAccountNotes: vi.fn(),
+      setAccountNotes: vi.fn(),
+      getBudgetMonthNotes: vi.fn(),
+      setBudgetMonthNotes: vi.fn(),
     };
 
     mockReq = {
@@ -40,14 +40,14 @@ describe('Notes Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
       locals: {
         budget: mockBudget
       }
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const module = require('../../../src/v1/routes/notes');
     module(mockRouter);

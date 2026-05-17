@@ -7,28 +7,28 @@ describe('Accounts Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     // Track all registered route handlers
     handlers = {};
 
     // Create a mock express router that tracks handlers
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      post: jest.fn((path, handler) => {
+      post: vi.fn((path, handler) => {
         handlers[`POST ${path}`] = handler;
       }),
-      patch: jest.fn((path, handler) => {
+      patch: vi.fn((path, handler) => {
         handlers[`PATCH ${path}`] = handler;
       }),
-      delete: jest.fn((path, handler) => {
+      delete: vi.fn((path, handler) => {
         handlers[`DELETE ${path}`] = handler;
       }),
-      put: jest.fn((path, handler) => {
+      put: vi.fn((path, handler) => {
         handlers[`PUT ${path}`] = handler;
       }),
     };
@@ -44,7 +44,7 @@ describe('Accounts Routes', () => {
     };
 
     mockBudget = {
-      getAccounts: jest.fn().mockResolvedValue([
+      getAccounts: vi.fn().mockResolvedValue([
         {
           id: 'acc1',
           name: 'Checking',
@@ -58,31 +58,31 @@ describe('Accounts Routes', () => {
           closed: false,
         },
       ]),
-      getAccount: jest.fn().mockResolvedValue({
+      getAccount: vi.fn().mockResolvedValue({
         id: 'acc1',
         name: 'Checking',
         offbudget: false,
         closed: false,
       }),
-      getAccountBalance: jest.fn().mockResolvedValue(5000),
-      createAccount: jest.fn().mockResolvedValue({
+      getAccountBalance: vi.fn().mockResolvedValue(5000),
+      createAccount: vi.fn().mockResolvedValue({
         id: 'new-acc',
         name: 'New Account',
         offbudget: false,
         closed: false,
       }),
-      updateAccount: jest.fn().mockResolvedValue({
+      updateAccount: vi.fn().mockResolvedValue({
         id: 'acc1',
         name: 'Checking Updated',
         offbudget: false,
       }),
-      deleteAccount: jest.fn().mockResolvedValue(undefined),
-      closeAccount: jest.fn().mockResolvedValue(undefined),
-      reopenAccount: jest.fn().mockResolvedValue(undefined),
-      runBankSync: jest.fn().mockResolvedValue(undefined),
+      deleteAccount: vi.fn().mockResolvedValue(undefined),
+      closeAccount: vi.fn().mockResolvedValue(undefined),
+      reopenAccount: vi.fn().mockResolvedValue(undefined),
+      runBankSync: vi.fn().mockResolvedValue(undefined),
       // Actual-QL helpers used by the new balancehistory implementation
-      q: jest.fn().mockReturnValue(aqBuilder),
-      runQuery: jest.fn(),
+      q: vi.fn().mockReturnValue(aqBuilder),
+      runQuery: vi.fn(),
     };
 
     // Create mock request/response objects
@@ -93,22 +93,22 @@ describe('Accounts Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
       locals: {
         budget: mockBudget,
       },
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const accountsModule = require('../../../src/v1/routes/accounts');
     accountsModule(mockRouter);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllTimers();
+    vi.restoreAllMocks();
+    vi.clearAllTimers();
   });
 
   describe('GET /budgets/:budgetSyncId/accounts', () => {

@@ -1,4 +1,4 @@
-jest.mock('../../../src/v1/actual-client-provider');
+const actualClientProvider = require('../../../src/v1/actual-client-provider');
 
 describe('Settings Routes', () => {
   let mockRouter;
@@ -9,26 +9,25 @@ describe('Settings Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     handlers = {};
 
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      post: jest.fn((path, handler) => {
+      post: vi.fn((path, handler) => {
         handlers[`POST ${path}`] = handler;
       }),
     };
 
     mockBudget = {
-      getSettings: jest.fn().mockResolvedValue({
+      getSettings: vi.fn().mockResolvedValue({
         locale: 'en-US',
         maxMonthsOfHistory: 24,
       }),
-      exportBudget: jest.fn().mockResolvedValue('exported-data'),
+      exportBudget: vi.fn().mockResolvedValue('exported-data'),
     };
 
     mockReq = {
@@ -38,43 +37,34 @@ describe('Settings Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
-      setHeader: jest.fn().mockReturnThis(),
-      end: jest.fn(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
+      setHeader: vi.fn().mockReturnThis(),
+      end: vi.fn(),
       locals: {
         budget: mockBudget,
       },
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const settingsModule = require('../../../src/v1/routes/settings');
     settingsModule(mockRouter);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('GET /budgets', () => {
-    let getActualApiClient;
-
-    beforeEach(() => {
-      ({
-        getActualApiClient,
-      } = require('../../../src/v1/actual-client-provider'));
-      getActualApiClient.mockReset();
-    });
-
     it('should register the routes', () => {
       expect(mockRouter.get).toHaveBeenCalledWith('/budgets', expect.any(Function));
     });
 
     it('should use server instance', async () => {
       const handler = handlers['GET /budgets'];
-      const getBudgets = jest.fn().mockResolvedValue([{ id: 'server-budget' }]);
-      getActualApiClient.mockResolvedValue({ getBudgets });
+      const getBudgets = vi.fn().mockResolvedValue([{ id: 'server-budget' }]);
+      vi.spyOn(actualClientProvider, 'getActualApiClient').mockResolvedValue({ getBudgets });
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -87,8 +77,8 @@ describe('Settings Routes', () => {
     it('should handle errors from getSettings', async () => {
       const handler = handlers['GET /budgets'];
       const error = new Error('boom');
-      const getBudgets = jest.fn().mockRejectedValue(error);
-      getActualApiClient.mockResolvedValue({ getBudgets });
+      const getBudgets = vi.fn().mockRejectedValue(error);
+      vi.spyOn(actualClientProvider, 'getActualApiClient').mockResolvedValue({ getBudgets });
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -122,7 +112,7 @@ describe('Settings Routes', () => {
 
     it('should return the server version', async () => {
       const handler = handlers['GET /budgets/:budgetSyncId/actualserverversion'];
-      mockBudget.getServerVersion = jest.fn().mockResolvedValue({ version: '26.5.0' });
+      mockBudget.getServerVersion = vi.fn().mockResolvedValue({ version: '26.5.0' });
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -133,7 +123,7 @@ describe('Settings Routes', () => {
 
     it('should call next with an error when response contains an error field', async () => {
       const handler = handlers['GET /budgets/:budgetSyncId/actualserverversion'];
-      mockBudget.getServerVersion = jest.fn().mockResolvedValue({ error: 'server unavailable' });
+      mockBudget.getServerVersion = vi.fn().mockResolvedValue({ error: 'server unavailable' });
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -145,7 +135,7 @@ describe('Settings Routes', () => {
     it('should call next with an error when getServerVersion throws', async () => {
       const handler = handlers['GET /budgets/:budgetSyncId/actualserverversion'];
       const error = new Error('connection refused');
-      mockBudget.getServerVersion = jest.fn().mockRejectedValue(error);
+      mockBudget.getServerVersion = vi.fn().mockRejectedValue(error);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -163,12 +153,12 @@ describe('Settings Routes', () => {
 
     it('should export budget data', async () => {
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
-      mockBudget.exportData = jest.fn().mockResolvedValueOnce({
+      mockBudget.exportData = vi.fn().mockResolvedValueOnce({
         fileName: 'budget.zip',
         fileStream: {
-          pipe: jest.fn().mockReturnThis(),
-          finalize: jest.fn(),
-          on: jest.fn(),
+          pipe: vi.fn().mockReturnThis(),
+          finalize: vi.fn(),
+          on: vi.fn(),
         },
       });
 
@@ -181,7 +171,7 @@ describe('Settings Routes', () => {
     it('should handle errors from exportBudget', async () => {
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
       const error = new Error('Export failed');
-      mockBudget.exportData = jest.fn().mockRejectedValueOnce(error);
+      mockBudget.exportData = vi.fn().mockRejectedValueOnce(error);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -190,12 +180,12 @@ describe('Settings Routes', () => {
 
     it('should set correct headers for file download', async () => {
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
-      mockBudget.exportData = jest.fn().mockResolvedValueOnce({
+      mockBudget.exportData = vi.fn().mockResolvedValueOnce({
         fileName: 'budget.zip',
         fileStream: {
-          pipe: jest.fn().mockReturnThis(),
-          finalize: jest.fn(),
-          on: jest.fn(),
+          pipe: vi.fn().mockReturnThis(),
+          finalize: vi.fn(),
+          on: vi.fn(),
         },
       });
 
@@ -233,16 +223,16 @@ describe('Settings Routes', () => {
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
       let errorCallback;
       const mockFileStream = {
-        pipe: jest.fn().mockReturnThis(),
-        finalize: jest.fn(),
-        on: jest.fn((event, cb) => { if (event === 'error') errorCallback = cb; }),
+        pipe: vi.fn().mockReturnThis(),
+        finalize: vi.fn(),
+        on: vi.fn((event, cb) => { if (event === 'error') errorCallback = cb; }),
       };
-      mockBudget.exportData = jest.fn().mockResolvedValueOnce({
+      mockBudget.exportData = vi.fn().mockResolvedValueOnce({
         fileName: 'budget.zip',
         fileStream: mockFileStream,
       });
       mockRes.headersSent = false;
-      mockRes.send = jest.fn();
+      mockRes.send = vi.fn();
 
       await handler(mockReq, mockRes, mockNext);
       errorCallback(new Error('zip failed'));
@@ -255,16 +245,16 @@ describe('Settings Routes', () => {
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
       let errorCallback;
       const mockFileStream = {
-        pipe: jest.fn().mockReturnThis(),
-        finalize: jest.fn(),
-        on: jest.fn((event, cb) => { if (event === 'error') errorCallback = cb; }),
+        pipe: vi.fn().mockReturnThis(),
+        finalize: vi.fn(),
+        on: vi.fn((event, cb) => { if (event === 'error') errorCallback = cb; }),
       };
-      mockBudget.exportData = jest.fn().mockResolvedValueOnce({
+      mockBudget.exportData = vi.fn().mockResolvedValueOnce({
         fileName: 'budget.zip',
         fileStream: mockFileStream,
       });
       mockRes.headersSent = true;
-      mockRes.send = jest.fn();
+      mockRes.send = vi.fn();
 
       await handler(mockReq, mockRes, mockNext);
       errorCallback(new Error('zip failed'));

@@ -1,25 +1,26 @@
 const request = require('supertest');
 const express = require('express');
 
-jest.mock('../../../src/v1/budget', () => ({
-  Budget: jest.fn()
-}));
-
-const mockAuthorizeRequest = jest.fn((req, res, next) => next());
-jest.mock('../../../src/v1/middlewares/api-key-authorization', () => ({
-  authorizeRequest: mockAuthorizeRequest
-}));
-
-jest.mock('../../../src/v1/middlewares/error-handler', () => ({
-  errorHandler: jest.fn((err, req, res, next) => {
-    res.status(500).json({ error: err.message });
-  })
-}));
-
+const budgetModule = require('../../../src/v1/budget');
+const apiKeyModule = require('../../../src/v1/middlewares/api-key-authorization');
+const errorHandlerModule = require('../../../src/v1/middlewares/error-handler');
 const router = require('../../../src/v1/routes/index');
 
 describe('index.js router', () => {
-  beforeEach(() => jest.clearAllMocks());
+  let mockBudget, mockAuthorizeRequest, mockErrorHandler;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockBudget = vi.spyOn(budgetModule, 'Budget');
+    mockAuthorizeRequest = vi.spyOn(apiKeyModule, 'authorizeRequest').mockImplementation((req, res, next) => next());
+    mockErrorHandler = vi.spyOn(errorHandlerModule, 'errorHandler').mockImplementation((err, req, res, next) => {
+      res.status(500).json({ error: err.message });
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   function createApp() {
     const app = express();
@@ -29,8 +30,7 @@ describe('index.js router', () => {
   }
 
   it('budget middleware loads budget into res.locals', async () => {
-    const { Budget } = require('../../../src/v1/budget');
-    Budget.mockResolvedValue({ ok: true });
+    mockBudget.mockResolvedValue({ ok: true });
 
     const app = createApp();
 
@@ -38,12 +38,11 @@ describe('index.js router', () => {
       .get('/budgets/abc123/accounts')
       .set('budget-encryption-password', 'pw123');
 
-    expect(Budget).toHaveBeenCalledWith('abc123', 'pw123');
+    expect(mockBudget).toHaveBeenCalledWith('abc123', 'pw123');
   });
 
   it('authorizeRequest is called for every request', async () => {
-    const { Budget } = require('../../../src/v1/budget');
-    Budget.mockResolvedValue({ ok: true });
+    mockBudget.mockResolvedValue({ ok: true });
 
     const app = createApp();
 
@@ -58,8 +57,7 @@ describe('index.js router', () => {
   });
 
   it('error pipeline works when Budget throws', async () => {
-    const { Budget } = require('../../../src/v1/budget');
-    Budget.mockRejectedValue(new Error('Boom!'));
+    mockBudget.mockRejectedValue(new Error('Boom!'));
 
     const app = createApp();
 

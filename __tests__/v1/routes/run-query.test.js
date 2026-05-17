@@ -7,50 +7,50 @@ describe('Run Query Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     // Track all registered route handlers
     handlers = {};
 
     // Create a mock express router that tracks handlers
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      post: jest.fn((path, handler) => {
+      post: vi.fn((path, handler) => {
         handlers[`POST ${path}`] = handler;
       }),
-      patch: jest.fn((path, handler) => {
+      patch: vi.fn((path, handler) => {
         handlers[`PATCH ${path}`] = handler;
       }),
-      delete: jest.fn((path, handler) => {
+      delete: vi.fn((path, handler) => {
         handlers[`DELETE ${path}`] = handler;
       }),
-      put: jest.fn((path, handler) => {
+      put: vi.fn((path, handler) => {
         handlers[`PUT ${path}`] = handler;
       }),
     };
 
     // Create a comprehensive mock budget object
     const mockQuery = {
-      filter: jest.fn().mockReturnThis(),
-      unfilter: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      calculate: jest.fn().mockReturnThis(),
-      options: jest.fn().mockReturnThis(),
-      groupBy: jest.fn().mockReturnThis(),
-      orderBy: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      offset: jest.fn().mockReturnThis(),
-      raw: jest.fn().mockReturnThis(),
-      withDead: jest.fn().mockReturnThis(),
-      withoutValidatedRefs: jest.fn().mockReturnThis(),
+      filter: vi.fn().mockReturnThis(),
+      unfilter: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      calculate: vi.fn().mockReturnThis(),
+      options: vi.fn().mockReturnThis(),
+      groupBy: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      offset: vi.fn().mockReturnThis(),
+      raw: vi.fn().mockReturnThis(),
+      withDead: vi.fn().mockReturnThis(),
+      withoutValidatedRefs: vi.fn().mockReturnThis(),
     };
 
     mockBudget = {
-      q: jest.fn().mockReturnValue(mockQuery),
-      runQuery: jest.fn().mockResolvedValue({ data: { some: 'data' } }),
+      q: vi.fn().mockReturnValue(mockQuery),
+      runQuery: vi.fn().mockResolvedValue({ data: { some: 'data' } }),
     };
 
     // Create mock request/response objects
@@ -61,21 +61,21 @@ describe('Run Query Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
       locals: {
         budget: mockBudget,
       },
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const runQueryModule = require('../../../src/v1/routes/run-query');
     runQueryModule(mockRouter);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('POST /budgets/:budgetSyncId/run-query', () => {
