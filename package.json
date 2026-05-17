@@ -17,6 +17,8 @@
     "@actual-app/api": "^26.5.2",
     "archiver": "^8.0.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.1.0",
     "js-yaml": "^4.1.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
