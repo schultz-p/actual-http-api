@@ -1,4 +1,5 @@
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const schedulesModule = require('../../../src/v1/routes/schedules');
 
 describe('Schedules Routes', () => {
   let mockRouter;
@@ -19,8 +20,6 @@ describe('Schedules Routes', () => {
   };
 
   beforeEach(() => {
-    vi.resetModules();
-
     mockBudget = {
       getSchedules: vi.fn().mockResolvedValue([scheduleFixture]),
       getSchedule: vi.fn().mockResolvedValue(scheduleFixture),
@@ -31,8 +30,6 @@ describe('Schedules Routes', () => {
 
     ({ router: mockRouter, handlers } = createMockRouter());
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
-
-    const schedulesModule = require('../../../src/v1/routes/schedules');
     schedulesModule(mockRouter);
   });
 

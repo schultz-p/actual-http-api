@@ -1,4 +1,5 @@
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const tagsModule = require('../../../src/v1/routes/tags');
 
 describe('Tags Routes', () => {
   let mockRouter;
@@ -9,8 +10,6 @@ describe('Tags Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-
     mockBudget = {
       getTags: vi.fn().mockResolvedValue([
         { id: 'tag1', tag: 'important', color: '#ff0000', description: 'Important tag' },
@@ -22,9 +21,7 @@ describe('Tags Routes', () => {
 
     ({ router: mockRouter, handlers } = createMockRouter());
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
-
-    const module = require('../../../src/v1/routes/tags');
-    module(mockRouter);
+    tagsModule(mockRouter);
   });
 
   describe('GET /budgets/:budgetSyncId/tags', () => {

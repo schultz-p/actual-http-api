@@ -1,4 +1,5 @@
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const rulesModule = require('../../../src/v1/routes/rules');
 
 describe('Rules Routes', () => {
   let mockRouter;
@@ -9,8 +10,6 @@ describe('Rules Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-
     mockBudget = {
       getRules: vi.fn().mockResolvedValue([{ id: 'rule1', name: 'Auto-categorize', enabled: true }]),
       getRule: vi.fn().mockResolvedValue({ id: 'rule1', name: 'Auto-categorize', enabled: true }),
@@ -21,8 +20,6 @@ describe('Rules Routes', () => {
 
     ({ router: mockRouter, handlers } = createMockRouter());
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
-
-    const rulesModule = require('../../../src/v1/routes/rules');
     rulesModule(mockRouter);
   });
 

@@ -1,4 +1,5 @@
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const payeesModule = require('../../../src/v1/routes/payees');
 
 describe('Payees Routes', () => {
   let mockRouter;
@@ -9,8 +10,6 @@ describe('Payees Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-
     mockBudget = {
       getPayees: vi.fn().mockResolvedValue([
         { id: 'payee1', name: 'Grocery Store', transfer_acct: null },
@@ -24,8 +23,6 @@ describe('Payees Routes', () => {
 
     ({ router: mockRouter, handlers } = createMockRouter());
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
-
-    const payeesModule = require('../../../src/v1/routes/payees');
     payeesModule(mockRouter);
   });
 

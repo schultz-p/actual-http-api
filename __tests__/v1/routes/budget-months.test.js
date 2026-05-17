@@ -1,4 +1,5 @@
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
 
 describe('Budget Months Routes', () => {
   let mockRouter;
@@ -9,8 +10,6 @@ describe('Budget Months Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-
     mockBudget = {
       getMonths: vi.fn().mockResolvedValue(['2023-08', '2023-09', '2023-10']),
       getMonth: vi.fn().mockResolvedValue({
@@ -44,8 +43,6 @@ describe('Budget Months Routes', () => {
 
     ({ router: mockRouter, handlers } = createMockRouter());
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
-
-    const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
     budgetMonthsModule(mockRouter);
   });
 

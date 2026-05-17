@@ -1,4 +1,5 @@
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const categoriesModule = require('../../../src/v1/routes/categories');
 
 describe('Categories Routes', () => {
   let mockRouter;
@@ -9,8 +10,6 @@ describe('Categories Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-
     mockBudget = {
       getCategories: vi.fn().mockResolvedValue([
         { id: 'cat1', name: 'Groceries', group_id: 'grp1', is_income: false },
@@ -30,8 +29,6 @@ describe('Categories Routes', () => {
 
     ({ router: mockRouter, handlers } = createMockRouter());
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
-
-    const categoriesModule = require('../../../src/v1/routes/categories');
     categoriesModule(mockRouter);
   });
 

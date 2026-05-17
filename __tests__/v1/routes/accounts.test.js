@@ -1,4 +1,5 @@
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const accountsModule = require('../../../src/v1/routes/accounts');
 
 describe('Accounts Routes', () => {
   let mockRouter;
@@ -9,8 +10,6 @@ describe('Accounts Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-
     const aqBuilder = {
       filter() { return this; },
       groupBy() { return this; },
@@ -38,8 +37,6 @@ describe('Accounts Routes', () => {
 
     ({ router: mockRouter, handlers } = createMockRouter());
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
-
-    const accountsModule = require('../../../src/v1/routes/accounts');
     accountsModule(mockRouter);
   });
 
