@@ -59,6 +59,24 @@
  *           description: Disable reference validation.
  */
 
+const ALLOWED_TABLES = new Set([
+  'transactions',
+  'accounts',
+  'payees',
+  'payee_locations',
+  'categories',
+  'category_groups',
+  'schedules',
+  'rules',
+  'transaction_filters',
+  'custom_reports',
+  'dashboard',
+  'dashboard_pages',
+  'notes',
+  'reflect_budgets',
+  'zero_budgets',
+]);
+
 module.exports = (router) => {
   const { config } = require('../../config/config');
   const { EXPERIMENTAL_DISABLED_MESSAGE } = require('./constants');
@@ -115,6 +133,9 @@ module.exports = (router) => {
       }
       if (!queryParams.table) {
         throw new Error('table is required in ActualQLquery');
+      }
+      if (!ALLOWED_TABLES.has(queryParams.table)) {
+        throw new Error(`Invalid table: ${queryParams.table}`);
       }
 
       let query = res.locals.budget.q(queryParams.table);

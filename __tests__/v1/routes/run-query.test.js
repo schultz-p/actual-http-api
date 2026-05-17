@@ -236,6 +236,19 @@ describe('Run Query Routes', () => {
       expect(mockNext.mock.calls[0][0].message).toBe('table is required in ActualQLquery');
     });
 
+    it('should throw error if table is not in the allowed list', async () => {
+      const runQueryModule = require('../../../src/v1/routes/run-query');
+      runQueryModule(mockRouter);
+
+      const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
+      mockReq.body = { ActualQLquery: { table: 'kv_blobs' } };
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockNext.mock.calls[0][0].message).toMatch(/Invalid table/);
+    });
+
     it('should handle errors from runQuery', async () => {
       const runQueryModule = require('../../../src/v1/routes/run-query');
       runQueryModule(mockRouter);
