@@ -1,7 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-
 describe('Transactions Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -11,7 +7,6 @@ describe('Transactions Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.resetModules();
     jest.clearAllMocks();
 
@@ -83,17 +78,17 @@ describe('Transactions Routes', () => {
     };
 
     mockNext = jest.fn();
+
+    const transactionsModule = require('../../../src/v1/routes/transactions');
+    transactionsModule(mockRouter);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.clearAllTimers();
   });
 
   describe('GET /budgets/:budgetSyncId/accounts/:accountId/transactions', () => {
     it('should register the route', () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/accounts/:accountId/transactions',
@@ -102,8 +97,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should return transactions list for an account', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -121,8 +114,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should return transactions with date range', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -135,8 +126,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject without since_date', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -147,8 +136,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject for nonexistent account', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'nonexistent';
@@ -161,8 +148,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should support pagination with page and limit', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -186,8 +171,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject pagination with only page', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -200,8 +183,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should handle errors from getTransactions', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -217,8 +198,6 @@ describe('Transactions Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/accounts/:accountId/transactions', () => {
     it('should register the route', () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/accounts/:accountId/transactions',
@@ -227,8 +206,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should create a transaction', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -257,8 +234,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should set default values for learnCategories and runTransfers', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -279,8 +254,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject without transaction property', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -292,8 +265,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject with empty transaction', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -307,8 +278,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject for nonexistent account', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'nonexistent';
@@ -329,8 +298,6 @@ describe('Transactions Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/accounts/:accountId/transactions/batch', () => {
     it('should register the route', () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/accounts/:accountId/transactions/batch',
@@ -339,8 +306,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should create multiple transactions', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions/batch'];
       mockReq.params.accountId = 'acc1';
@@ -371,8 +336,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject without transactions array', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions/batch'];
       mockReq.params.accountId = 'acc1';
@@ -384,8 +347,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject with empty transactions array', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions/batch'];
       mockReq.params.accountId = 'acc1';
@@ -401,8 +362,6 @@ describe('Transactions Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/accounts/:accountId/transactions/import', () => {
     it('should register the route', () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/accounts/:accountId/transactions/import',
@@ -411,8 +370,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should import transactions', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions/import'];
       mockReq.params.accountId = 'acc1';
@@ -439,8 +396,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should import transactions with explicit options', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions/import'];
       mockReq.params.accountId = 'acc1';
@@ -469,8 +424,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject without transactions array', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions/import'];
       mockReq.params.accountId = 'acc1';
@@ -484,8 +437,6 @@ describe('Transactions Routes', () => {
 
   describe('PATCH /budgets/:budgetSyncId/transactions/:transactionId', () => {
     it('should register the route', () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       expect(mockRouter.patch).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/transactions/:transactionId',
@@ -494,8 +445,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should update a transaction', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/transactions/:transactionId'];
       mockReq.params.transactionId = 'txn1';
@@ -517,8 +466,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should reject without transaction property', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/transactions/:transactionId'];
       mockReq.params.transactionId = 'txn1';
@@ -532,8 +479,6 @@ describe('Transactions Routes', () => {
 
   describe('DELETE /budgets/:budgetSyncId/transactions/:transactionId', () => {
     it('should register the route', () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       expect(mockRouter.delete).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/transactions/:transactionId',
@@ -542,8 +487,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should delete a transaction', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/transactions/:transactionId'];
       mockReq.params.transactionId = 'txn1';
@@ -557,8 +500,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should handle errors from deleteTransaction', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/transactions/:transactionId'];
       const error = new Error('failed');
@@ -572,8 +513,6 @@ describe('Transactions Routes', () => {
 
   describe('DELETE /budgets/:budgetSyncId/transactions/batch', () => {
     it('should register the route', () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       expect(mockRouter.delete).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/transactions/batch',
@@ -582,8 +521,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should delete multiple transactions', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/transactions/batch'];
       mockReq.body = {
@@ -599,8 +536,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should handle missing transactionIds (defaults to empty array)', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/transactions/batch'];
       mockReq.body = {};
@@ -614,8 +549,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should handle empty transactionIds array', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/transactions/batch'];
       mockReq.body = {
@@ -633,8 +566,6 @@ describe('Transactions Routes', () => {
 
   describe('Error Handling', () => {
     it('should handle errors from addTransaction', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/accounts/:accountId/transactions'];
       mockReq.params.accountId = 'acc1';
@@ -654,8 +585,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should handle errors from updateTransaction', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/transactions/:transactionId'];
       mockReq.params.transactionId = 'txn1';
@@ -671,8 +600,6 @@ describe('Transactions Routes', () => {
     });
 
     it('should handle errors from deleteTransactions (batch)', async () => {
-      const transactionsModule = require('../../../src/v1/routes/transactions');
-      transactionsModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/transactions/batch'];
       const error = new Error('failed');

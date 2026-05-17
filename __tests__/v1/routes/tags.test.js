@@ -1,6 +1,3 @@
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-
 describe('Tags Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -57,14 +54,14 @@ describe('Tags Routes', () => {
     };
 
     mockNext = jest.fn();
+
+    const module = require('../../../src/v1/routes/tags');
+    module(mockRouter);
   });
 
   describe('GET /budgets/:budgetSyncId/tags', () => {
 
     it('should register the route', () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/tags',
         expect.any(Function)
@@ -72,9 +69,6 @@ describe('Tags Routes', () => {
     });
 
     it('should return list of tags', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/tags'];
 
       await handler(mockReq, mockRes, mockNext);
@@ -88,9 +82,6 @@ describe('Tags Routes', () => {
     });
 
     it('should handle errors from getTags', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/tags'];
       const error = new Error('failed');
       mockBudget.getTags.mockRejectedValueOnce(error);
@@ -105,9 +96,6 @@ describe('Tags Routes', () => {
   describe('GET /budgets/:budgetSyncId/tags/:tagId', () => {
 
     it('should return specific tag', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/tags/:tagId'];
 
       mockReq.params.tagId = 'tag1';
@@ -120,9 +108,6 @@ describe('Tags Routes', () => {
     });
 
     it('should reject for nonexistent tag', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/tags/:tagId'];
 
       mockReq.params.tagId = 'missing';
@@ -134,9 +119,6 @@ describe('Tags Routes', () => {
     });
 
     it('should treat null getTags response as empty list', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/tags/:tagId'];
 
       mockReq.params.tagId = 'tag1';
@@ -152,9 +134,6 @@ describe('Tags Routes', () => {
   describe('POST /budgets/:budgetSyncId/tags', () => {
 
     it('should create a tag', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/tags'];
 
       mockReq.body = {
@@ -171,9 +150,6 @@ describe('Tags Routes', () => {
     });
 
     it('should handle errors from createTag', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/tags'];
       const error = new Error('failed');
       mockBudget.createTag.mockRejectedValueOnce(error);
@@ -188,9 +164,6 @@ describe('Tags Routes', () => {
   describe('PATCH /budgets/:budgetSyncId/tags/:tagId', () => {
 
     it('should update a tag', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['PATCH /budgets/:budgetSyncId/tags/:tagId'];
 
       mockReq.params.tagId = 'tag1';
@@ -208,9 +181,6 @@ describe('Tags Routes', () => {
     });
 
     it('should handle errors from updateTag', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['PATCH /budgets/:budgetSyncId/tags/:tagId'];
       const error = new Error('failed');
       mockBudget.updateTag.mockRejectedValueOnce(error);
@@ -225,9 +195,6 @@ describe('Tags Routes', () => {
   describe('DELETE /budgets/:budgetSyncId/tags/:tagId', () => {
 
     it('should delete a tag', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['DELETE /budgets/:budgetSyncId/tags/:tagId'];
 
       mockReq.params.tagId = 'tag1';
@@ -242,9 +209,6 @@ describe('Tags Routes', () => {
     });
 
     it('should handle errors from deleteTag', async () => {
-      const module = require('../../../src/v1/routes/tags');
-      module(mockRouter);
-
       const handler = handlers['DELETE /budgets/:budgetSyncId/tags/:tagId'];
       const error = new Error('failed');
       mockBudget.deleteTag.mockRejectedValueOnce(error);

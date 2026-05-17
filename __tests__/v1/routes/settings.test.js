@@ -1,6 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
 jest.mock('../../../src/v1/actual-client-provider');
 
 describe('Settings Routes', () => {
@@ -12,7 +9,6 @@ describe('Settings Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.resetModules();
     jest.clearAllMocks();
 
@@ -52,11 +48,13 @@ describe('Settings Routes', () => {
     };
 
     mockNext = jest.fn();
+
+    const settingsModule = require('../../../src/v1/routes/settings');
+    settingsModule(mockRouter);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.clearAllTimers();
   });
 
   describe('GET /budgets', () => {
@@ -70,16 +68,10 @@ describe('Settings Routes', () => {
     });
 
     it('should register the routes', () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       expect(mockRouter.get).toHaveBeenCalledWith('/budgets', expect.any(Function));
     });
 
     it('should use server instance', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets'];
       const getBudgets = jest.fn().mockResolvedValue([{ id: 'server-budget' }]);
       getActualApiClient.mockResolvedValue({ getBudgets });
@@ -93,9 +85,6 @@ describe('Settings Routes', () => {
     });
 
     it('should handle errors from getSettings', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets'];
       const error = new Error('boom');
       const getBudgets = jest.fn().mockRejectedValue(error);
@@ -109,16 +98,10 @@ describe('Settings Routes', () => {
 
   describe('GET /actualhttpapiversion', () => {
     it('should register the route', () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       expect(mockRouter.get).toHaveBeenCalledWith('/actualhttpapiversion', expect.any(Function));
     });
 
     it('should return the package version', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /actualhttpapiversion'];
       const pkg = require('../../../package.json');
 
@@ -131,9 +114,6 @@ describe('Settings Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/actualserverversion', () => {
     it('should register the route', () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/actualserverversion',
         expect.any(Function)
@@ -141,9 +121,6 @@ describe('Settings Routes', () => {
     });
 
     it('should return the server version', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/actualserverversion'];
       mockBudget.getServerVersion = jest.fn().mockResolvedValue({ version: '26.5.0' });
 
@@ -155,9 +132,6 @@ describe('Settings Routes', () => {
     });
 
     it('should call next with an error when response contains an error field', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/actualserverversion'];
       mockBudget.getServerVersion = jest.fn().mockResolvedValue({ error: 'server unavailable' });
 
@@ -169,9 +143,6 @@ describe('Settings Routes', () => {
     });
 
     it('should call next with an error when getServerVersion throws', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/actualserverversion'];
       const error = new Error('connection refused');
       mockBudget.getServerVersion = jest.fn().mockRejectedValue(error);
@@ -184,9 +155,6 @@ describe('Settings Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/export', () => {
     it('should register the route', () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/export',
         expect.any(Function)
@@ -194,9 +162,6 @@ describe('Settings Routes', () => {
     });
 
     it('should export budget data', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
       mockBudget.exportData = jest.fn().mockResolvedValueOnce({
         fileName: 'budget.zip',
@@ -214,9 +179,6 @@ describe('Settings Routes', () => {
     });
 
     it('should handle errors from exportBudget', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
       const error = new Error('Export failed');
       mockBudget.exportData = jest.fn().mockRejectedValueOnce(error);
@@ -227,9 +189,6 @@ describe('Settings Routes', () => {
     });
 
     it('should set correct headers for file download', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
       mockBudget.exportData = jest.fn().mockResolvedValueOnce({
         fileName: 'budget.zip',
@@ -253,9 +212,7 @@ describe('Settings Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
       const configModule = require('../../../src/config/config');
-      settingsModule(mockRouter);
 
       const original = configModule.config.experimentalOperationsEnabled;
       configModule.config.experimentalOperationsEnabled = false;
@@ -273,9 +230,6 @@ describe('Settings Routes', () => {
     });
 
     it('should send 500 via fileStream error callback when headers are not sent', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
       let errorCallback;
       const mockFileStream = {
@@ -298,9 +252,6 @@ describe('Settings Routes', () => {
     });
 
     it('should not send 500 via fileStream error callback when headers are already sent', async () => {
-      const settingsModule = require('../../../src/v1/routes/settings');
-      settingsModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
       let errorCallback;
       const mockFileStream = {
