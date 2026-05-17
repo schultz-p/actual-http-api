@@ -2,15 +2,17 @@
 process.env.API_KEY = process.env.API_KEY || 'test-api-key';
 process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
 jest.mock('fs');
+// Register the mock factory once at the top level. jest.resetModules() clears the module cache
+// but preserves this factory, so each re-require after resetModules gets a fresh mock instance.
 jest.mock('@actual-app/api', () => ({
   init: jest.fn(),
   shutdown: jest.fn(),
-}), { virtual: true });
+}));
 
 let provider;
 
 describe('Actual Client Provider', () => {
-  let actualApi;
+  let mockActualApi;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -26,6 +28,13 @@ describe('Actual Client Provider', () => {
       serverPassword: 'password',
     };
 
+    // Obtain a fresh reference to the mocked @actual-app/api after resetModules so that
+    // the instance we configure here is the same one the provider will receive via its
+    // lazy require('@actual-app/api') call.
+    mockActualApi = require('@actual-app/api');
+    mockActualApi.init.mockResolvedValue(undefined);
+    mockActualApi.shutdown.mockResolvedValue(undefined);
+
     // Clean up the module cache to reset singleton state and require provider after config is set
     delete require.cache[require.resolve('../../src/v1/actual-client-provider')];
     provider = require('../../src/v1/actual-client-provider');
@@ -35,13 +44,6 @@ describe('Actual Client Provider', () => {
     jest.restoreAllMocks();
     // Clear any pending timers (e.g., the 1-hour timeout set by initializeActualApiClient)
     jest.clearAllTimers();
-    // Invalidate the actual API client singleton to prevent hanging timers between tests
-    try {
-      const provider = require('../../src/v1/actual-client-provider');
-      // Access the internals via shutdown if needed or just let module cache cleanup handle it
-    } catch (e) {
-      // Ignore cleanup errors
-    }
   });
 
   describe('getActualDataDir', () => {
@@ -67,29 +69,18 @@ describe('Actual Client Provider', () => {
   });
 
   describe('getActualApiClient', () => {
-    it('should initialize API client on first call', async () => {
+    beforeEach(() => {
       const fs = require('fs');
       fs.existsSync = jest.fn().mockReturnValue(true);
-      const mockActualApi = {
-        init: jest.fn().mockResolvedValue(undefined),
-        shutdown: jest.fn().mockResolvedValue(undefined),
-      };
-      jest.doMock('@actual-app/api', () => mockActualApi);
+    });
 
+    it('should initialize API client on first call', async () => {
       const client = await provider.getActualApiClient();
 
       expect(client).toBeDefined();
     });
 
     it('should reuse client on subsequent calls within timeout', async () => {
-      const fs = require('fs');
-      fs.existsSync = jest.fn().mockReturnValue(true);
-      const mockActualApi = {
-        init: jest.fn().mockResolvedValue(undefined),
-        shutdown: jest.fn().mockResolvedValue(undefined),
-      };
-      jest.doMock('@actual-app/api', () => mockActualApi);
-      
       const client1 = await provider.getActualApiClient();
       const client2 = await provider.getActualApiClient();
 
@@ -99,14 +90,6 @@ describe('Actual Client Provider', () => {
     });
 
     it('should configure API client with correct options', async () => {
-      const fs = require('fs');
-      fs.existsSync = jest.fn().mockReturnValue(true);
-      const mockActualApi = {
-        init: jest.fn().mockResolvedValue(undefined),
-        shutdown: jest.fn().mockResolvedValue(undefined),
-      };
-      jest.doMock('@actual-app/api', () => mockActualApi);
-
       await provider.getActualApiClient();
 
       expect(mockActualApi.init).toHaveBeenCalledWith({
@@ -117,14 +100,6 @@ describe('Actual Client Provider', () => {
     });
 
     it('should shut down and clear the client after the TTL expires', async () => {
-      const fs = require('fs');
-      fs.existsSync = jest.fn().mockReturnValue(true);
-      const mockActualApi = {
-        init: jest.fn().mockResolvedValue(undefined),
-        shutdown: jest.fn().mockResolvedValue(undefined),
-      };
-      jest.doMock('@actual-app/api', () => mockActualApi);
-
       await provider.getActualApiClient();
       expect(mockActualApi.shutdown).not.toHaveBeenCalled();
 
@@ -135,14 +110,6 @@ describe('Actual Client Provider', () => {
     });
 
     it('should re-initialize the client after TTL invalidation', async () => {
-      const fs = require('fs');
-      fs.existsSync = jest.fn().mockReturnValue(true);
-      const mockActualApi = {
-        init: jest.fn().mockResolvedValue(undefined),
-        shutdown: jest.fn().mockResolvedValue(undefined),
-      };
-      jest.doMock('@actual-app/api', () => mockActualApi);
-
       await provider.getActualApiClient();
       await jest.advanceTimersByTimeAsync(60 * 60 * 1000);
 
