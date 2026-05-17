@@ -45,6 +45,12 @@ app.get('/api-docs/swagger.yaml', authorizeRequest, (req, res) => {
 
 app.listen(config.port, () => {
     console.log("Actual HTTP Server Listening on PORT: ", config.port);
+    if (config.swagger.protocol !== 'https') {
+      console.warn(
+        'WARNING: SWAGGER_PROTOCOL is not set to "https". ' +
+        'Run this service behind a TLS-terminating proxy to protect credentials in transit.'
+      );
+    }
   });
 
 /**
