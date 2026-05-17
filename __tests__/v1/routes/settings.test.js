@@ -1,5 +1,8 @@
 const actualClientProvider = require('../../../src/v1/actual-client-provider');
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+vi.mock('../../../src/config/config', () => ({ config: { experimentalOperationsEnabled: true } }));
+const { config } = require('../../../src/config/config');
+const settingsModule = require('../../../src/v1/routes/settings');
 
 describe('Settings Routes', () => {
   let mockRouter;
@@ -10,6 +13,8 @@ describe('Settings Routes', () => {
   let handlers;
 
   beforeEach(() => {
+    config.experimentalOperationsEnabled = true;
+
     mockBudget = {
       getSettings: vi.fn().mockResolvedValue({ locale: 'en-US', maxMonthsOfHistory: 24 }),
       exportBudget: vi.fn().mockResolvedValue('exported-data'),
@@ -19,8 +24,6 @@ describe('Settings Routes', () => {
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
     mockRes.setHeader = vi.fn().mockReturnThis();
     mockRes.end = vi.fn();
-
-    const settingsModule = require('../../../src/v1/routes/settings');
     settingsModule(mockRouter);
   });
 
@@ -180,15 +183,10 @@ describe('Settings Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
-      await handler(mockReq, mockRes, mockNext);
 
-      configModule.config.experimentalOperationsEnabled = original;
+      await handler(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockRes.json).toHaveBeenCalledWith(

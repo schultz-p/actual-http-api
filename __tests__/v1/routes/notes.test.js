@@ -1,5 +1,9 @@
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
 
+vi.mock('../../../src/config/config', () => ({ config: { experimentalOperationsEnabled: true } }));
+const { config } = require('../../../src/config/config');
+const notesModule = require('../../../src/v1/routes/notes');
+
 describe('Notes Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -9,7 +13,7 @@ describe('Notes Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
+    config.experimentalOperationsEnabled = true;
 
     mockBudget = {
       getCategoryNotes: vi.fn(),
@@ -22,9 +26,7 @@ describe('Notes Routes', () => {
 
     ({ router: mockRouter, handlers } = createMockRouter());
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
-
-    const module = require('../../../src/v1/routes/notes');
-    module(mockRouter);
+    notesModule(mockRouter);
   });
 
   describe('GET /budgets/:budgetSyncId/notes/category/:categoryId', () => {
@@ -218,15 +220,11 @@ describe('Notes Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['PUT /budgets/:budgetSyncId/notes/category/:categoryId'];
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
 
       mockReq.body = { data: 'note' };
       await handler(mockReq, mockRes, mockNext);
-      configModule.config.experimentalOperationsEnabled = original;
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockNext).not.toHaveBeenCalled();
@@ -277,14 +275,10 @@ describe('Notes Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['DELETE /budgets/:budgetSyncId/notes/category/:categoryId'];
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
 
       await handler(mockReq, mockRes, mockNext);
-      configModule.config.experimentalOperationsEnabled = original;
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockNext).not.toHaveBeenCalled();
@@ -323,15 +317,11 @@ describe('Notes Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['PUT /budgets/:budgetSyncId/notes/account/:accountId'];
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
 
       mockReq.body = { data: 'note' };
       await handler(mockReq, mockRes, mockNext);
-      configModule.config.experimentalOperationsEnabled = original;
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockNext).not.toHaveBeenCalled();
@@ -369,14 +359,10 @@ describe('Notes Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['DELETE /budgets/:budgetSyncId/notes/account/:accountId'];
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
 
       await handler(mockReq, mockRes, mockNext);
-      configModule.config.experimentalOperationsEnabled = original;
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockNext).not.toHaveBeenCalled();
@@ -425,15 +411,11 @@ describe('Notes Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['PUT /budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth'];
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
 
       mockReq.body = { data: 'note' };
       await handler(mockReq, mockRes, mockNext);
-      configModule.config.experimentalOperationsEnabled = original;
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockNext).not.toHaveBeenCalled();
@@ -471,14 +453,10 @@ describe('Notes Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['DELETE /budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth'];
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
 
       await handler(mockReq, mockRes, mockNext);
-      configModule.config.experimentalOperationsEnabled = original;
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockNext).not.toHaveBeenCalled();

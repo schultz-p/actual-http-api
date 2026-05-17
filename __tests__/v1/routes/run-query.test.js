@@ -1,4 +1,7 @@
 const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+vi.mock('../../../src/config/config', () => ({ config: { experimentalOperationsEnabled: true } }));
+const { config } = require('../../../src/config/config');
+const runQueryModule = require('../../../src/v1/routes/run-query');
 
 describe('Run Query Routes', () => {
   let mockRouter;
@@ -9,7 +12,7 @@ describe('Run Query Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
+    config.experimentalOperationsEnabled = true;
 
     const mockQuery = {
       filter: vi.fn().mockReturnThis(),
@@ -33,8 +36,6 @@ describe('Run Query Routes', () => {
 
     ({ router: mockRouter, handlers } = createMockRouter());
     ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
-
-    const runQueryModule = require('../../../src/v1/routes/run-query');
     runQueryModule(mockRouter);
   });
 
@@ -193,15 +194,11 @@ describe('Run Query Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
 
       mockReq.body = { ActualQLquery: { table: 'transactions' } };
       await handler(mockReq, mockRes, mockNext);
-      configModule.config.experimentalOperationsEnabled = original;
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockNext).not.toHaveBeenCalled();
