@@ -10,10 +10,8 @@ describe('Accounts Routes', () => {
     vi.resetModules();
     vi.clearAllMocks();
 
-    // Track all registered route handlers
     handlers = {};
 
-    // Create a mock express router that tracks handlers
     mockRouter = {
       get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
@@ -32,8 +30,6 @@ describe('Accounts Routes', () => {
       }),
     };
 
-    // Create a comprehensive mock budget object
-    // Provide a chainable Actual-QL builder mock for `q(...)` so route code can call .filter/.groupBy/.orderBy/.select/.calculate
     const aqBuilder = {
       filter() { return this; },
       groupBy() { return this; },
@@ -79,12 +75,10 @@ describe('Accounts Routes', () => {
       closeAccount: vi.fn().mockResolvedValue(undefined),
       reopenAccount: vi.fn().mockResolvedValue(undefined),
       runBankSync: vi.fn().mockResolvedValue(undefined),
-      // Actual-QL helpers used by the new balancehistory implementation
       q: vi.fn().mockReturnValue(aqBuilder),
       runQuery: vi.fn(),
     };
 
-    // Create mock request/response objects
     mockReq = {
       params: {},
       query: {},
@@ -273,12 +267,11 @@ describe('Accounts Routes', () => {
       mockReq.params.accountId = 'acc1';
       mockReq.query.since_date = '2023-08-01';
       mockReq.query.until_date = '2023-08-03';
-      // mock runQuery responses: first call -> startingBalance, second -> grouped per-day sums
       mockBudget.runQuery
         .mockResolvedValueOnce({ data: 0 })
         .mockResolvedValueOnce({ data: [
           { date: '2023-08-01', amount: 1000 },
-          { date: '2023-08-02', amount: 0 },    // zero amount exercises row.amount || 0 branch
+          { date: '2023-08-02', amount: 0 },
           { date: '2023-08-03', amount: -50 },
         ] });
 
@@ -300,8 +293,8 @@ describe('Accounts Routes', () => {
       mockReq.query.since_date = '2023-08-01';
       mockReq.query.until_date = '2023-08-02';
       mockBudget.runQuery
-        .mockResolvedValueOnce({ data: 500 })   // non-zero starting balance (truthy branch of line 74)
-        .mockResolvedValueOnce({ data: null });  // null grouped data (falsy branch of line 86 → || [])
+        .mockResolvedValueOnce({ data: 500 })
+        .mockResolvedValueOnce({ data: null });
 
       await handler(mockReq, mockRes, mockNext);
 

@@ -10,10 +10,8 @@ describe('Run Query Routes', () => {
     vi.resetModules();
     vi.clearAllMocks();
 
-    // Track all registered route handlers
     handlers = {};
 
-    // Create a mock express router that tracks handlers
     mockRouter = {
       get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
@@ -32,7 +30,6 @@ describe('Run Query Routes', () => {
       }),
     };
 
-    // Create a comprehensive mock budget object
     const mockQuery = {
       filter: vi.fn().mockReturnThis(),
       unfilter: vi.fn().mockReturnThis(),
@@ -53,7 +50,6 @@ describe('Run Query Routes', () => {
       runQuery: vi.fn().mockResolvedValue({ data: { some: 'data' } }),
     };
 
-    // Create mock request/response objects
     mockReq = {
       params: {},
       query: {},
