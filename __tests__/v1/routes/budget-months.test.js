@@ -1,7 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-
 describe('Budget Months Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -11,7 +7,6 @@ describe('Budget Months Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.resetModules();
     jest.clearAllMocks();
 
@@ -112,17 +107,17 @@ describe('Budget Months Routes', () => {
     };
 
     mockNext = jest.fn();
+
+    const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
+    budgetMonthsModule(mockRouter);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.clearAllTimers();
   });
 
   describe('GET /budgets/:budgetSyncId/months', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months',
@@ -131,8 +126,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should return list of months', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months'];
       await handler(mockReq, mockRes, mockNext);
@@ -144,8 +137,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should handle errors from getMonths', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months'];
       const error = new Error('Budget not found');
@@ -159,8 +150,6 @@ describe('Budget Months Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/months/:month', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months/:month',
@@ -169,8 +158,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should return month details', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month'];
       mockReq.params.month = '2023-08';
@@ -187,8 +174,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should handle errors from getMonth', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month'];
       mockReq.params.month = '2023-08';
@@ -203,8 +188,6 @@ describe('Budget Months Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/months/:month/categories', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months/:month/categories',
@@ -213,8 +196,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should handle errors from getMonthCategories', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories'];
       const error = new Error('failed');
@@ -226,8 +207,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should return month categories', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories'];
       mockReq.params.month = '2023-08';
@@ -245,8 +224,6 @@ describe('Budget Months Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/months/:month/categories/:categoryId', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months/:month/categories/:categoryId',
@@ -255,8 +232,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should return specific category details', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
       mockReq.params.month = '2023-08';
@@ -271,8 +246,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should call next with error when getMonthCategory throws', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
       const error = new Error('db error');
@@ -285,8 +258,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should call next with not-found error when category is null', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
       mockBudget.getMonthCategory = jest.fn().mockResolvedValue(null);
@@ -299,8 +270,6 @@ describe('Budget Months Routes', () => {
 
   describe('PATCH /budgets/:budgetSyncId/months/:month/categories/:categoryId', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.patch).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months/:month/categories/:categoryId',
@@ -309,8 +278,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should update a month category', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
       mockReq.params.month = '2023-08';
@@ -331,8 +298,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should reject without category property', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
       mockReq.params.month = '2023-08';
@@ -345,8 +310,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should call next with not-found error when category does not exist', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
       mockReq.params.month = '2023-08';
@@ -362,8 +325,6 @@ describe('Budget Months Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/months/:month/categorygroups', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months/:month/categorygroups',
@@ -372,8 +333,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should return category groups for month', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups'];
       mockReq.params.month = '2023-08';
@@ -393,8 +352,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should handle errors from getMonthCategoryGroups', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups'];
       const error = new Error('failed');
@@ -408,8 +365,6 @@ describe('Budget Months Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId',
@@ -418,8 +373,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should return specific category group', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId'];
       mockReq.params.month = '2023-08';
@@ -439,8 +392,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should call next with error when getMonthCategoryGroup throws', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId'];
       const error = new Error('db error');
@@ -453,8 +404,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should call next with not-found error when category group is null', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId'];
       mockBudget.getMonthCategoryGroup = jest.fn().mockResolvedValue(null);
@@ -467,8 +416,6 @@ describe('Budget Months Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/months/:month/categorytransfers', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months/:month/categorytransfers',
@@ -477,8 +424,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should transfer category budget', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/months/:month/categorytransfers'];
       mockReq.params.month = '2023-08';
@@ -501,8 +446,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should reject without categorytransfer property', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/months/:month/categorytransfers'];
       mockReq.params.month = '2023-08';
@@ -516,8 +459,6 @@ describe('Budget Months Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/months/:month/nextmonthbudgethold', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months/:month/nextmonthbudgethold',
@@ -526,8 +467,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should set next month budget hold', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/months/:month/nextmonthbudgethold'];
       mockReq.params.month = '2023-08';
@@ -546,8 +485,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should handle errors from holdBudgetForNextMonth', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/months/:month/nextmonthbudgethold'];
       const error = new Error('failed');
@@ -561,8 +498,6 @@ describe('Budget Months Routes', () => {
 
   describe('DELETE /budgets/:budgetSyncId/months/:month/nextmonthbudgethold', () => {
     it('should register the route', () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       expect(mockRouter.delete).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/months/:month/nextmonthbudgethold',
@@ -571,8 +506,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should delete next month budget hold', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/months/:month/nextmonthbudgethold'];
       mockReq.params.month = '2023-08';
@@ -588,8 +521,6 @@ describe('Budget Months Routes', () => {
     });
 
     it('should handle errors from resetBudgetHold', async () => {
-      const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
-      budgetMonthsModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/months/:month/nextmonthbudgethold'];
       const error = new Error('failed');

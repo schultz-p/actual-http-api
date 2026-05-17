@@ -1,7 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-
 describe('Rules Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -11,7 +7,6 @@ describe('Rules Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.resetModules();
     jest.clearAllMocks();
 
@@ -71,17 +66,17 @@ describe('Rules Routes', () => {
     };
 
     mockNext = jest.fn();
+
+    const rulesModule = require('../../../src/v1/routes/rules');
+    rulesModule(mockRouter);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.clearAllTimers();
   });
 
   describe('GET /budgets/:budgetSyncId/rules', () => {
     it('should register the route', () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/rules',
@@ -90,8 +85,6 @@ describe('Rules Routes', () => {
     });
 
     it('should return list of rules', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/rules'];
       await handler(mockReq, mockRes, mockNext);
@@ -105,8 +98,6 @@ describe('Rules Routes', () => {
     });
 
     it('should support pagination', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/rules'];
       mockReq.query.page = '1';
@@ -119,8 +110,6 @@ describe('Rules Routes', () => {
     });
 
     it('should handle errors from getRules', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/rules'];
       const error = new Error('Failed to fetch rules');
@@ -134,8 +123,6 @@ describe('Rules Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/rules/:ruleId', () => {
     it('should register the route', () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/rules/:ruleId',
@@ -144,8 +131,6 @@ describe('Rules Routes', () => {
     });
 
     it('should return specific rule', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/rules/:ruleId'];
       mockReq.params.ruleId = 'rule1';
@@ -163,8 +148,6 @@ describe('Rules Routes', () => {
     });
 
     it('should reject for nonexistent rule', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/rules/:ruleId'];
       mockReq.params.ruleId = 'nonexistent';
@@ -178,8 +161,6 @@ describe('Rules Routes', () => {
     });
 
     it('should treat null getRules response as empty list', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/rules/:ruleId'];
       mockReq.params.ruleId = 'rule1';
@@ -193,8 +174,6 @@ describe('Rules Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/rules', () => {
     it('should register the route', () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/rules',
@@ -203,8 +182,6 @@ describe('Rules Routes', () => {
     });
 
     it('should create a rule', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/rules'];
       mockReq.body = {
@@ -224,8 +201,6 @@ describe('Rules Routes', () => {
     });
 
     it('should reject without rule property', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/rules'];
       mockReq.body = {};
@@ -240,8 +215,6 @@ describe('Rules Routes', () => {
 
   describe('PATCH /budgets/:budgetSyncId/rules/:ruleId', () => {
     it('should register the route', () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       expect(mockRouter.patch).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/rules/:ruleId',
@@ -250,8 +223,6 @@ describe('Rules Routes', () => {
     });
 
     it('should update a rule', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/rules/:ruleId'];
       mockReq.params.ruleId = 'rule1';
@@ -275,8 +246,6 @@ describe('Rules Routes', () => {
     });
 
     it('should reject for nonexistent rule', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/rules/:ruleId'];
       mockReq.params.ruleId = 'nonexistent';
@@ -292,8 +261,6 @@ describe('Rules Routes', () => {
 
   describe('DELETE /budgets/:budgetSyncId/rules/:ruleId', () => {
     it('should register the route', () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       expect(mockRouter.delete).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/rules/:ruleId',
@@ -302,8 +269,6 @@ describe('Rules Routes', () => {
     });
 
     it('should delete a rule', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/rules/:ruleId'];
       mockReq.params.ruleId = 'rule1';
@@ -317,8 +282,6 @@ describe('Rules Routes', () => {
     });
 
     it('should handle errors from deleteRule', async () => {
-      const rulesModule = require('../../../src/v1/routes/rules');
-      rulesModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/rules/:ruleId'];
       const error = new Error('failed');
