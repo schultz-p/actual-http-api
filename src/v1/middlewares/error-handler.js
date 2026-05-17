@@ -1,11 +1,11 @@
 
 function clientError(res, status, error, message) {
-  console.log(message, error);
+  console.log(message, error.message);
   res.status(status).json({"error": message});
 }
 
 function serverError(res, error, message) {
-  console.error(message, error);
+  console.error(message, error.message);
   res.status(500).json({"error": message});
 }
 
@@ -19,7 +19,7 @@ const errorHandler = (err, req, res, _next) => {
   } else if (err.message.includes('not found')
     || err.message.includes('No budget')
     || err.message.includes('Cannot destructure property')) {
-    clientError(res, 404, err, err.message);
+    clientError(res, 404, err, 'Resource not found');
   } else if (err.message.includes('Invalid month')
     || err.message.includes('required')
     || err.message.includes('Bad date format')
@@ -27,7 +27,7 @@ const errorHandler = (err, req, res, _next) => {
     || err.message.includes('convert to integer')
     || err.message.includes('must be')
   ) {
-    clientError(res, 400, err, err.message);
+    clientError(res, 400, err, 'Invalid request parameters');
   } else {
     serverError(res, err, 'Unknown error while interacting with Actual Api. See server logs for more information');
   }

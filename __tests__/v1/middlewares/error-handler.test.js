@@ -60,7 +60,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Resource not found' });
     });
 
     it('should return 404 for No budget errors', () => {
@@ -69,7 +69,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'No budget' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Resource not found' });
     });
 
     it('should return 404 for destructure errors', () => {
@@ -78,7 +78,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Cannot destructure property' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Resource not found' });
     });
 
     it('should return 400 for Invalid month errors', () => {
@@ -87,7 +87,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid month' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid request parameters' });
     });
 
     it('should return 400 for required field errors', () => {
@@ -96,7 +96,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Field required' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid request parameters' });
     });
 
     it('should return 400 for Bad date format errors', () => {
@@ -105,7 +105,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Bad date format' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid request parameters' });
     });
 
     it('should return 400 for does not exist on table errors', () => {
@@ -114,7 +114,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'does not exist on table' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid request parameters' });
     });
 
     it('should return 400 for convert to integer errors', () => {
@@ -123,7 +123,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'convert to integer' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid request parameters' });
     });
 
     it('should return 400 for must be errors', () => {
@@ -132,7 +132,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Value must be positive' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid request parameters' });
     });
 
     it('should return 500 for unknown errors', () => {
