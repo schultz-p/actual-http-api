@@ -14,8 +14,8 @@ const {
 
 describe('Utils', () => {
   beforeEach(() => {
-    vi.spyOn(fs, 'existsSync');
-    vi.spyOn(fs, 'mkdirSync');
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'mkdirSync').mockImplementation(() => {});
     vi.spyOn(fs, 'readdirSync');
     vi.spyOn(fs, 'readFileSync');
   });
