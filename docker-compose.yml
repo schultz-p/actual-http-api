@@ -6,9 +6,7 @@ services:
             - './data:/data:rw'
         ports:
             - '5007:5007'
-        environment:
-            - 'ACTUAL_SERVER_URL=http://localhost:5006/'
-            - 'ACTUAL_SERVER_PASSWORD=my-actual-server-password'
-            - 'API_KEY=my-strong-api-key'
+        env_file:
+            - .env
         restart: on-failure
         image: jhonderson/actual-http-api:latest
