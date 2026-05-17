@@ -25,7 +25,7 @@ app.use("/v1", v1Routes);
 
 // Catch-all error handler
 app.use(function(err, req, res, _next) {
-  console.log('Internal server error:', err);
+  console.error('Internal server error:', err.message);
   res.status(err.status || 500).json({"error": "Internal server error"});
 });
 
