@@ -359,19 +359,22 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
     const actualDataDir = getActualDataDir();
     try {
       const directories = listSubDirectories(actualDataDir);
+      const updated = {};
       directories.forEach(subDir => {
         if (fs.existsSync(path.join(actualDataDir, subDir, 'metadata.json'))) {
           const metadataRawContent = getFileContent(path.join(actualDataDir, subDir, 'metadata.json'));
           if (metadataRawContent) {
             const metadata = JSON.parse(metadataRawContent);
-            syncIdToBudgetId[metadata.groupId] = metadata.id;
+            updated[metadata.groupId] = metadata.id;
           }
         }
       });
+      // Replace the reference atomically so concurrent readers never see a partial map
+      syncIdToBudgetId = updated;
     } catch(err) {
       // The system will continue working normally,the only thing is that the budget will be downloaded
       // everytime the api is called
-      console.error('Error creating map from sync id to budget id', err);
+      console.error('Error creating map from sync id to budget id', err.message);
     }
   }
 
