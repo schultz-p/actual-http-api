@@ -573,7 +573,7 @@ module.exports = (router) => {
   }
 
   function validateTransactionsArray(transactions) {
-    if (transactions === undefined || !transactions.length) {
+    if (!Array.isArray(transactions) || transactions.length === 0) {
       throw new Error('List of transactions is required');
     }
   }
