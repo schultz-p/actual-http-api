@@ -1,6 +1,7 @@
 const { config } = require('./src/config/config');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const yaml = require('js-yaml');
 
@@ -8,6 +9,8 @@ const v1Routes = require("./src/v1/routes");
 const { authorizeRequest } = require('./src/v1/middlewares/api-key-authorization');
 
 const app = express();
+
+app.use(helmet());
 
 app.use(rateLimit({
   windowMs: 60 * 1000,
