@@ -100,6 +100,16 @@ describe('Settings Routes', () => {
       expect(mockRes.json).toHaveBeenCalledWith({ data: { version: pkg.version } });
       expect(mockNext).not.toHaveBeenCalled();
     });
+
+    it('should call next when res.json throws', async () => {
+      const handler = handlers['GET /actualhttpapiversion'];
+      const error = new Error('serialization error');
+      mockRes.json.mockImplementationOnce(() => { throw error; });
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('GET /budgets/:budgetSyncId/actualserverversion', () => {
