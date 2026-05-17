@@ -1,25 +1,45 @@
 const request = require('supertest');
 const express = require('express');
 
-jest.mock('../../../src/v1/budget', () => ({
-  Budget: jest.fn()
-}));
-
-const mockAuthorizeRequest = jest.fn((req, res, next) => next());
-jest.mock('../../../src/v1/middlewares/api-key-authorization', () => ({
-  authorizeRequest: mockAuthorizeRequest
-}));
-
-jest.mock('../../../src/v1/middlewares/error-handler', () => ({
-  errorHandler: jest.fn((err, req, res, next) => {
-    res.status(500).json({ error: err.message });
-  })
-}));
-
-const router = require('../../../src/v1/routes/index');
+let router;
+let mockAuthorizeRequest;
 
 describe('index.js router', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    vi.resetModules();
+    Object.keys(require.cache).forEach(key => {
+      if (key.includes('/src/')) delete require.cache[key];
+    });
+
+    // Spy on actual-client-provider so settings.js's GET /budgets handler doesn't
+    // try to connect to a real server when that route is exercised.
+    const providerMod = require('../../../src/v1/actual-client-provider');
+    vi.spyOn(providerMod, 'getActualApiClient').mockResolvedValue({
+      getBudgets: vi.fn().mockResolvedValue([]),
+    });
+
+    // Spy on Budget so the router's budget middleware uses a mock.
+    const budgetMod = require('../../../src/v1/budget');
+    vi.spyOn(budgetMod, 'Budget').mockResolvedValue({ ok: true });
+
+    // Spy on authorizeRequest so all routes pass auth.
+    const authMod = require('../../../src/v1/middlewares/api-key-authorization');
+    mockAuthorizeRequest = vi.spyOn(authMod, 'authorizeRequest')
+      .mockImplementation((req, res, next) => next());
+
+    // Spy on errorHandler so errors return a predictable 500 response.
+    const errMod = require('../../../src/v1/middlewares/error-handler');
+    vi.spyOn(errMod, 'errorHandler').mockImplementation((err, req, res, next) => {
+      res.status(500).json({ error: err.message });
+    });
+
+    // Load the router last so it picks up all the spied exports from ViteNode's cache.
+    router = require('../../../src/v1/routes/index');
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   function createApp() {
     const app = express();

@@ -1,4 +1,3 @@
-jest.mock('fs');
 const fs = require('fs');
 const path = require('path');
 const {
@@ -14,8 +13,15 @@ const {
 } = require('../../src/utils/utils');
 
 describe('Utils', () => {
+  beforeEach(() => {
+    vi.spyOn(fs, 'existsSync');
+    vi.spyOn(fs, 'mkdirSync');
+    vi.spyOn(fs, 'readdirSync');
+    vi.spyOn(fs, 'readFileSync');
+  });
+
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('createDirIfDoesNotExist', () => {

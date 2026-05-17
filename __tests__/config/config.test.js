@@ -1,18 +1,19 @@
-jest.mock('fs');
-const fs = require('fs');
-
 describe('Configuration', () => {
   let originalEnv;
 
   beforeEach(() => {
     originalEnv = process.env;
     process.env = { ...originalEnv };
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    Object.keys(require.cache).forEach(key => {
+      if (key.includes('/src/config/') || key.includes('/dotenv/')) delete require.cache[key];
+    });
+    vi.restoreAllMocks();
   });
 
   afterEach(() => {
     process.env = originalEnv;
+    vi.restoreAllMocks();
   });
 
   describe('loadMandatorySecret', () => {
@@ -31,7 +32,11 @@ describe('Configuration', () => {
       process.env.API_KEY_PATH = '/path/to/secret';
       process.env.ACTUAL_SERVER_PASSWORD = 'test-password';
       const fs = require('fs');
-      fs.readFileSync = jest.fn().mockReturnValue('secret-from-file\n');
+      const realReadFileSync = fs.readFileSync.bind(fs);
+      vi.spyOn(fs, 'readFileSync').mockImplementation((path, opts) => {
+        if (path === '/path/to/secret') return 'secret-from-file\n';
+        return realReadFileSync(path, opts);
+      });
 
       const { config: cfg } = require('../../src/config/config');
 
@@ -43,13 +48,10 @@ describe('Configuration', () => {
       process.env.API_KEY = 'direct-secret';
       process.env.API_KEY_PATH = '/path/to/secret';
       process.env.ACTUAL_SERVER_PASSWORD = 'test-password';
-      const fs = require('fs');
-      fs.readFileSync = jest.fn().mockReturnValue('file-secret\n');
 
       const { config: cfg } = require('../../src/config/config');
 
       expect(cfg.apiKey).toBe('direct-secret');
-      // fs.readFileSync may be called by dotenv config() if .env file exists, so we just verify the right secret is loaded
     });
 
     it('should throw error if secret is not found', () => {
@@ -67,8 +69,10 @@ describe('Configuration', () => {
       process.env.API_KEY_PATH = '/invalid/path';
       process.env.ACTUAL_SERVER_PASSWORD = 'test-password';
       const fs = require('fs');
-      fs.readFileSync = jest.fn().mockImplementation(() => {
-        throw new Error('ENOENT: no such file');
+      const realReadFileSync = fs.readFileSync.bind(fs);
+      vi.spyOn(fs, 'readFileSync').mockImplementation((path, opts) => {
+        if (path === '/invalid/path') throw new Error('ENOENT: no such file');
+        return realReadFileSync(path, opts);
       });
 
       expect(() => {

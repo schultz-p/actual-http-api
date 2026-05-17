@@ -7,32 +7,32 @@ describe('Transactions Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     handlers = {};
 
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      post: jest.fn((path, handler) => {
+      post: vi.fn((path, handler) => {
         handlers[`POST ${path}`] = handler;
       }),
-      patch: jest.fn((path, handler) => {
+      patch: vi.fn((path, handler) => {
         handlers[`PATCH ${path}`] = handler;
       }),
-      delete: jest.fn((path, handler) => {
+      delete: vi.fn((path, handler) => {
         handlers[`DELETE ${path}`] = handler;
       }),
     };
 
     mockBudget = {
-      getAccount: jest.fn().mockResolvedValue({
+      getAccount: vi.fn().mockResolvedValue({
         id: 'acc1',
         name: 'Checking',
       }),
-      getTransactions: jest.fn().mockResolvedValue([
+      getTransactions: vi.fn().mockResolvedValue([
         {
           id: 'txn1',
           account: 'acc1',
@@ -50,17 +50,17 @@ describe('Transactions Routes', () => {
           cleared: false,
         },
       ]),
-      addTransaction: jest.fn().mockResolvedValue('ok'),
-      addTransactions: jest.fn().mockResolvedValue('ok'),
-      importTransactions: jest.fn().mockResolvedValue({
+      addTransaction: vi.fn().mockResolvedValue('ok'),
+      addTransactions: vi.fn().mockResolvedValue('ok'),
+      importTransactions: vi.fn().mockResolvedValue({
         imported: 2,
       }),
-      updateTransaction: jest.fn().mockResolvedValue({
+      updateTransaction: vi.fn().mockResolvedValue({
         id: 'txn1',
         amount: -100,
       }),
-      deleteTransaction: jest.fn().mockResolvedValue(undefined),
-      deleteTransactions: jest.fn().mockResolvedValue(undefined),
+      deleteTransaction: vi.fn().mockResolvedValue(undefined),
+      deleteTransactions: vi.fn().mockResolvedValue(undefined),
     };
 
     mockReq = {
@@ -70,21 +70,21 @@ describe('Transactions Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
       locals: {
         budget: mockBudget,
       },
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const transactionsModule = require('../../../src/v1/routes/transactions');
     transactionsModule(mockRouter);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/accounts/:accountId/transactions', () => {

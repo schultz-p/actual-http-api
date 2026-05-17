@@ -2,7 +2,7 @@
 const { currentLocalDate, formatDateToISOString, listSubDirectories, getFileContent } = require('../utils/utils');
 const { getActualApiClient, getActualDataDir } = require('./actual-client-provider');
 
-const archiver = require('archiver');
+const { ZipArchive } = require('archiver');
 const fs = require('fs');
 const path = require('path');
 
@@ -387,7 +387,7 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
       throw new Error(`Budget not found for budget sync id ${budgetSyncId}`);
     }
     // Create the archive
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const archive = new ZipArchive({ zlib: { level: 9 } });
     // Add files to the archive
     for (const file of ['db.sqlite', 'metadata.json']) {
       archive.file(path.join(dataDir, budget.id, file), { name: file });

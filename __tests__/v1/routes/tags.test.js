@@ -7,36 +7,36 @@ describe('Tags Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     handlers = {};
 
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      post: jest.fn((path, handler) => {
+      post: vi.fn((path, handler) => {
         handlers[`POST ${path}`] = handler;
       }),
-      patch: jest.fn((path, handler) => {
+      patch: vi.fn((path, handler) => {
         handlers[`PATCH ${path}`] = handler;
       }),
-      delete: jest.fn((path, handler) => {
+      delete: vi.fn((path, handler) => {
         handlers[`DELETE ${path}`] = handler;
       }),
     };
 
     mockBudget = {
-      getTags: jest.fn().mockResolvedValue([
+      getTags: vi.fn().mockResolvedValue([
         { id: 'tag1', tag: 'important', color: '#ff0000', description: 'Important tag' }
       ]),
-      createTag: jest.fn().mockResolvedValue({
+      createTag: vi.fn().mockResolvedValue({
         id: 'new-tag',
         tag: 'newtag'
       }),
-      updateTag: jest.fn().mockResolvedValue(undefined),
-      deleteTag: jest.fn().mockResolvedValue(undefined),
+      updateTag: vi.fn().mockResolvedValue(undefined),
+      deleteTag: vi.fn().mockResolvedValue(undefined),
     };
 
     mockReq = {
@@ -46,14 +46,14 @@ describe('Tags Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
       locals: {
         budget: mockBudget
       }
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const module = require('../../../src/v1/routes/tags');
     module(mockRouter);

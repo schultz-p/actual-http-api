@@ -6,17 +6,17 @@ describe('API Key Authorization Middleware', () => {
 
   beforeEach(() => {
     req = {
-      get: jest.fn(),
+      get: vi.fn(),
     };
     res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
     };
-    next = jest.fn();
+    next = vi.fn();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('authorizeRequest', () => {

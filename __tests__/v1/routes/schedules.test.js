@@ -7,28 +7,28 @@ describe('Schedules Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     handlers = {};
 
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      post: jest.fn((path, handler) => {
+      post: vi.fn((path, handler) => {
         handlers[`POST ${path}`] = handler;
       }),
-      patch: jest.fn((path, handler) => {
+      patch: vi.fn((path, handler) => {
         handlers[`PATCH ${path}`] = handler;
       }),
-      delete: jest.fn((path, handler) => {
+      delete: vi.fn((path, handler) => {
         handlers[`DELETE ${path}`] = handler;
       }),
     };
 
     mockBudget = {
-      getSchedules: jest.fn().mockResolvedValue([
+      getSchedules: vi.fn().mockResolvedValue([
         {
           id: 'schedule1',
           name: 'Monthly Rent',
@@ -39,7 +39,7 @@ describe('Schedules Routes', () => {
           amountOp: 'is',
         },
       ]),
-      getSchedule: jest.fn().mockResolvedValue({
+      getSchedule: vi.fn().mockResolvedValue({
         id: 'schedule1',
         name: 'Monthly Rent',
         next_date: '2024-02-01',
@@ -48,13 +48,13 @@ describe('Schedules Routes', () => {
         amount: -150000,
         amountOp: 'is',
       }),
-      createSchedule: jest.fn().mockResolvedValue('new-schedule-id'),
-      updateSchedule: jest.fn().mockResolvedValue({
+      createSchedule: vi.fn().mockResolvedValue('new-schedule-id'),
+      updateSchedule: vi.fn().mockResolvedValue({
         id: 'schedule1',
         name: 'Updated Rent',
         amount: -160000,
       }),
-      deleteSchedule: jest.fn().mockResolvedValue(undefined),
+      deleteSchedule: vi.fn().mockResolvedValue(undefined),
     };
 
     mockReq = {
@@ -64,21 +64,21 @@ describe('Schedules Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
       locals: {
         budget: mockBudget,
       },
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const schedulesModule = require('../../../src/v1/routes/schedules');
     schedulesModule(mockRouter);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/schedules', () => {

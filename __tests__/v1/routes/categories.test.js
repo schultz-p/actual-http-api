@@ -7,28 +7,28 @@ describe('Categories Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     handlers = {};
 
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      post: jest.fn((path, handler) => {
+      post: vi.fn((path, handler) => {
         handlers[`POST ${path}`] = handler;
       }),
-      patch: jest.fn((path, handler) => {
+      patch: vi.fn((path, handler) => {
         handlers[`PATCH ${path}`] = handler;
       }),
-      delete: jest.fn((path, handler) => {
+      delete: vi.fn((path, handler) => {
         handlers[`DELETE ${path}`] = handler;
       }),
     };
 
     mockBudget = {
-      getCategories: jest.fn().mockResolvedValue([
+      getCategories: vi.fn().mockResolvedValue([
         {
           id: 'cat1',
           name: 'Groceries',
@@ -36,42 +36,42 @@ describe('Categories Routes', () => {
           is_income: false,
         },
       ]),
-      getCategory: jest.fn().mockResolvedValue({
+      getCategory: vi.fn().mockResolvedValue({
         id: 'cat1',
         name: 'Groceries',
         group_id: 'grp1',
         is_income: false,
       }),
-      createCategory: jest.fn().mockResolvedValue({
+      createCategory: vi.fn().mockResolvedValue({
         id: 'new-cat',
         name: 'New Category',
       }),
-      updateCategory: jest.fn().mockResolvedValue({
+      updateCategory: vi.fn().mockResolvedValue({
         id: 'cat1',
         name: 'Groceries Updated',
       }),
-      deleteCategory: jest.fn().mockResolvedValue(undefined),
-      getCategoryGroups: jest.fn().mockResolvedValue([
+      deleteCategory: vi.fn().mockResolvedValue(undefined),
+      getCategoryGroups: vi.fn().mockResolvedValue([
         {
           id: 'grp1',
           name: 'Regular Expenses',
           is_income: false,
         },
       ]),
-      getCategoryGroup: jest.fn().mockResolvedValue({
+      getCategoryGroup: vi.fn().mockResolvedValue({
         id: 'grp1',
         name: 'Regular Expenses',
         is_income: false,
       }),
-      createCategoryGroup: jest.fn().mockResolvedValue({
+      createCategoryGroup: vi.fn().mockResolvedValue({
         id: 'new-grp',
         name: 'New Group',
       }),
-      updateCategoryGroup: jest.fn().mockResolvedValue({
+      updateCategoryGroup: vi.fn().mockResolvedValue({
         id: 'grp1',
         name: 'Updated Group',
       }),
-      deleteCategoryGroup: jest.fn().mockResolvedValue(undefined),
+      deleteCategoryGroup: vi.fn().mockResolvedValue(undefined),
     };
 
     mockReq = {
@@ -81,21 +81,21 @@ describe('Categories Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
       locals: {
         budget: mockBudget,
       },
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const categoriesModule = require('../../../src/v1/routes/categories');
     categoriesModule(mockRouter);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/categories', () => {

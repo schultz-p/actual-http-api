@@ -1,13 +1,6 @@
 // Ensure required secrets exist before importing modules that load config at module initialization
 process.env.API_KEY = process.env.API_KEY || 'test-api-key';
 process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-jest.mock('fs');
-// Register the mock factory once at the top level. jest.resetModules() clears the module cache
-// but preserves this factory, so each re-require after resetModules gets a fresh mock instance.
-jest.mock('@actual-app/api', () => ({
-  init: jest.fn(),
-  shutdown: jest.fn(),
-}));
 
 let provider;
 
@@ -15,10 +8,14 @@ describe('Actual Client Provider', () => {
   let mockActualApi;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.resetModules();
-    jest.clearAllMocks();
-    jest.spyOn(console, 'log').mockImplementation();
+    vi.useFakeTimers();
+    vi.resetModules();
+    // vi.resetModules() clears ViteNode's cache but not Node's native require.cache.
+    // Clear native cache for local modules so they re-execute on next require().
+    Object.keys(require.cache).forEach(key => {
+      if (key.includes('/src/')) delete require.cache[key];
+    });
+    vi.spyOn(console, 'log').mockImplementation();
 
     // Mock the config (mutate after module load)
     const cfg = require('../../src/config/config').config;
@@ -28,29 +25,26 @@ describe('Actual Client Provider', () => {
       serverPassword: 'password',
     };
 
-    // Obtain a fresh reference to the mocked @actual-app/api after resetModules so that
-    // the instance we configure here is the same one the provider will receive via its
-    // lazy require('@actual-app/api') call.
+    // Load @actual-app/api and spy on its methods so the provider's lazy require gets the spied version.
     mockActualApi = require('@actual-app/api');
-    mockActualApi.init.mockResolvedValue(undefined);
-    mockActualApi.shutdown.mockResolvedValue(undefined);
+    vi.spyOn(mockActualApi, 'init').mockResolvedValue(undefined);
+    vi.spyOn(mockActualApi, 'shutdown').mockResolvedValue(undefined);
 
-    // Clean up the module cache to reset singleton state and require provider after config is set
-    delete require.cache[require.resolve('../../src/v1/actual-client-provider')];
+    // Load provider fresh after spies are in place.
     provider = require('../../src/v1/actual-client-provider');
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     // Clear any pending timers (e.g., the 1-hour timeout set by initializeActualApiClient)
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   describe('getActualDataDir', () => {
     it('should create directory if it does not exist', () => {
       const fs = require('fs');
-      fs.existsSync = jest.fn().mockReturnValue(false);
-      fs.mkdirSync = jest.fn();
+      fs.existsSync = vi.fn().mockReturnValue(false);
+      fs.mkdirSync = vi.fn();
 
       provider.getActualDataDir();
 
@@ -60,7 +54,7 @@ describe('Actual Client Provider', () => {
 
     it('should return the configured data directory', () => {
       const fs = require('fs');
-      fs.existsSync = jest.fn().mockReturnValue(true);
+      fs.existsSync = vi.fn().mockReturnValue(true);
 
       const result = provider.getActualDataDir();
 
@@ -71,7 +65,7 @@ describe('Actual Client Provider', () => {
   describe('getActualApiClient', () => {
     beforeEach(() => {
       const fs = require('fs');
-      fs.existsSync = jest.fn().mockReturnValue(true);
+      fs.existsSync = vi.fn().mockReturnValue(true);
     });
 
     it('should initialize API client on first call', async () => {
@@ -104,14 +98,14 @@ describe('Actual Client Provider', () => {
       expect(mockActualApi.shutdown).not.toHaveBeenCalled();
 
       // Advance past the 1-hour TTL
-      await jest.advanceTimersByTimeAsync(60 * 60 * 1000);
+      await vi.advanceTimersByTimeAsync(60 * 60 * 1000);
 
       expect(mockActualApi.shutdown).toHaveBeenCalledTimes(1);
     });
 
     it('should re-initialize the client after TTL invalidation', async () => {
       await provider.getActualApiClient();
-      await jest.advanceTimersByTimeAsync(60 * 60 * 1000);
+      await vi.advanceTimersByTimeAsync(60 * 60 * 1000);
 
       // Client should re-initialize on next call after invalidation
       await provider.getActualApiClient();
