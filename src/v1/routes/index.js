@@ -5,7 +5,9 @@ const { errorHandler } = require('../middlewares/error-handler');
 
 const router = express.Router();
 
-router.use('/budgets/:budgetSyncId', authorizeRequest, async (req, res, next) => {
+router.use(authorizeRequest);
+
+router.use('/budgets/:budgetSyncId', async (req, res, next) => {
     try {
       res.locals.budget = await Budget(req.params.budgetSyncId, req.get('budget-encryption-password'));
       next();

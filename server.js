@@ -1,5 +1,7 @@
 const { config } = require('./src/config/config');
 const express = require('express');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const yaml = require('js-yaml');
 
@@ -8,13 +10,22 @@ const { authorizeRequest } = require('./src/v1/middlewares/api-key-authorization
 
 const app = express();
 
-app.use(express.json());
+app.use(helmet());
+
+app.use(rateLimit({
+  windowMs: 60 * 1000,
+  limit: 300,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+}));
+
+app.use(express.json({ limit: '1mb' }));
 
 app.use("/v1", v1Routes);
 
 // Catch-all error handler
 app.use(function(err, req, res, _next) {
-  console.log('Internal server error:', err);
+  console.error('Internal server error:', err.message);
   res.status(err.status || 500).json({"error": "Internal server error"});
 });
 
@@ -34,6 +45,12 @@ app.get('/api-docs/swagger.yaml', authorizeRequest, (req, res) => {
 
 app.listen(config.port, () => {
     console.log("Actual HTTP Server Listening on PORT: ", config.port);
+    if (config.swagger.protocol !== 'https') {
+      console.warn(
+        'WARNING: SWAGGER_PROTOCOL is not set to "https". ' +
+        'Run this service behind a TLS-terminating proxy to protect credentials in transit.'
+      );
+    }
   });
 
 /**

@@ -131,11 +131,11 @@ describe('Configuration', () => {
       expect(cfg.experimentalOperationsEnabled).toBe(false);
     });
 
-    it('is always enabled in test regardless of the flag', () => {
+    it('is disabled in test when the flag is set to false', () => {
       process.env.EXPERIMENTAL_OPERATIONS_ENABLED = 'false';
       process.env.NODE_ENV = 'test';
       const { config: cfg } = require('../../src/config/config');
-      expect(cfg.experimentalOperationsEnabled).toBe(true);
+      expect(cfg.experimentalOperationsEnabled).toBe(false);
     });
   });
 });
