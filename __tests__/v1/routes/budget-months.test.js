@@ -7,29 +7,29 @@ describe('Budget Months Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     handlers = {};
 
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      post: jest.fn((path, handler) => {
+      post: vi.fn((path, handler) => {
         handlers[`POST ${path}`] = handler;
       }),
-      patch: jest.fn((path, handler) => {
+      patch: vi.fn((path, handler) => {
         handlers[`PATCH ${path}`] = handler;
       }),
-      delete: jest.fn((path, handler) => {
+      delete: vi.fn((path, handler) => {
         handlers[`DELETE ${path}`] = handler;
       }),
     };
 
     mockBudget = {
-      getMonths: jest.fn().mockResolvedValue(['2023-08', '2023-09', '2023-10']),
-      getMonth: jest.fn().mockResolvedValue({
+      getMonths: vi.fn().mockResolvedValue(['2023-08', '2023-09', '2023-10']),
+      getMonth: vi.fn().mockResolvedValue({
         month: '2023-08',
         incomeAvailable: 1000,
         lastMonthOverspent: 0,
@@ -42,7 +42,7 @@ describe('Budget Months Routes', () => {
         totalBalance: 1000,
         categoryGroups: [],
       }),
-      getMonthCategories: jest.fn().mockResolvedValue([
+      getMonthCategories: vi.fn().mockResolvedValue([
         {
           id: 'cat1',
           name: 'Groceries',
@@ -52,7 +52,7 @@ describe('Budget Months Routes', () => {
           balance: 200,
         },
       ]),
-      getMonthCategory: jest.fn().mockResolvedValue({
+      getMonthCategory: vi.fn().mockResolvedValue({
         id: 'cat1',
         name: 'Groceries',
         group_id: 'grp1',
@@ -60,36 +60,36 @@ describe('Budget Months Routes', () => {
         spent: -300,
         balance: 200,
       }),
-      updateMonthCategory: jest.fn().mockResolvedValue({
+      updateMonthCategory: vi.fn().mockResolvedValue({
         id: 'cat1',
         name: 'Groceries',
         budgeted: 600,
       }),
-      getCategoryGroups: jest.fn().mockResolvedValue([
+      getCategoryGroups: vi.fn().mockResolvedValue([
         {
           id: 'grp1',
           name: 'Regular Expenses',
           is_income: false,
         },
       ]),
-      getCategoryGroup: jest.fn().mockResolvedValue({
+      getCategoryGroup: vi.fn().mockResolvedValue({
         id: 'grp1',
         name: 'Regular Expenses',
         is_income: false,
       }),
-      getMonthCategoryGroups: jest.fn().mockResolvedValue([
+      getMonthCategoryGroups: vi.fn().mockResolvedValue([
         {
           id: 'grp1',
           name: 'Income',
         },
       ]),
-      getMonthCategoryGroup: jest.fn().mockResolvedValue({
+      getMonthCategoryGroup: vi.fn().mockResolvedValue({
         id: 'grp1',
         name: 'Income',
       }),
-      transferCategory: jest.fn().mockResolvedValue(undefined),
-      setMonthBudgetHold: jest.fn().mockResolvedValue(undefined),
-      deleteMonthBudgetHold: jest.fn().mockResolvedValue(undefined),
+      transferCategory: vi.fn().mockResolvedValue(undefined),
+      setMonthBudgetHold: vi.fn().mockResolvedValue(undefined),
+      deleteMonthBudgetHold: vi.fn().mockResolvedValue(undefined),
     };
 
     mockReq = {
@@ -99,21 +99,21 @@ describe('Budget Months Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
       locals: {
         budget: mockBudget,
       },
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
     budgetMonthsModule(mockRouter);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/months', () => {
@@ -199,7 +199,7 @@ describe('Budget Months Routes', () => {
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories'];
       const error = new Error('failed');
-      mockBudget.getMonthCategories = jest.fn().mockRejectedValue(error);
+      mockBudget.getMonthCategories = vi.fn().mockRejectedValue(error);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -249,7 +249,7 @@ describe('Budget Months Routes', () => {
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
       const error = new Error('db error');
-      mockBudget.getMonthCategory = jest.fn().mockRejectedValue(error);
+      mockBudget.getMonthCategory = vi.fn().mockRejectedValue(error);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -260,7 +260,7 @@ describe('Budget Months Routes', () => {
     it('should call next with not-found error when category is null', async () => {
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categories/:categoryId'];
-      mockBudget.getMonthCategory = jest.fn().mockResolvedValue(null);
+      mockBudget.getMonthCategory = vi.fn().mockResolvedValue(null);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -315,7 +315,7 @@ describe('Budget Months Routes', () => {
       mockReq.params.month = '2023-08';
       mockReq.params.categoryId = 'cat1';
       mockReq.body = { category: { budgeted: 100 } };
-      mockBudget.getMonthCategory = jest.fn().mockResolvedValue(null);
+      mockBudget.getMonthCategory = vi.fn().mockResolvedValue(null);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -355,7 +355,7 @@ describe('Budget Months Routes', () => {
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups'];
       const error = new Error('failed');
-      mockBudget.getMonthCategoryGroups = jest.fn().mockRejectedValue(error);
+      mockBudget.getMonthCategoryGroups = vi.fn().mockRejectedValue(error);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -395,7 +395,7 @@ describe('Budget Months Routes', () => {
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId'];
       const error = new Error('db error');
-      mockBudget.getMonthCategoryGroup = jest.fn().mockRejectedValue(error);
+      mockBudget.getMonthCategoryGroup = vi.fn().mockRejectedValue(error);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -406,7 +406,7 @@ describe('Budget Months Routes', () => {
     it('should call next with not-found error when category group is null', async () => {
 
       const handler = handlers['GET /budgets/:budgetSyncId/months/:month/categorygroups/:categoryGroupId'];
-      mockBudget.getMonthCategoryGroup = jest.fn().mockResolvedValue(null);
+      mockBudget.getMonthCategoryGroup = vi.fn().mockResolvedValue(null);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -435,7 +435,7 @@ describe('Budget Months Routes', () => {
         },
       };
 
-      mockBudget.addCategoryTransfer = jest.fn().mockResolvedValue(undefined);
+      mockBudget.addCategoryTransfer = vi.fn().mockResolvedValue(undefined);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -474,7 +474,7 @@ describe('Budget Months Routes', () => {
         amount: 500,
       };
 
-      mockBudget.holdBudgetForNextMonth = jest.fn().mockResolvedValue(undefined);
+      mockBudget.holdBudgetForNextMonth = vi.fn().mockResolvedValue(undefined);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -488,7 +488,7 @@ describe('Budget Months Routes', () => {
 
       const handler = handlers['POST /budgets/:budgetSyncId/months/:month/nextmonthbudgethold'];
       const error = new Error('failed');
-      mockBudget.holdBudgetForNextMonth = jest.fn().mockRejectedValue(error);
+      mockBudget.holdBudgetForNextMonth = vi.fn().mockRejectedValue(error);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -510,7 +510,7 @@ describe('Budget Months Routes', () => {
       const handler = handlers['DELETE /budgets/:budgetSyncId/months/:month/nextmonthbudgethold'];
       mockReq.params.month = '2023-08';
 
-      mockBudget.resetBudgetHold = jest.fn().mockResolvedValue(undefined);
+      mockBudget.resetBudgetHold = vi.fn().mockResolvedValue(undefined);
 
       await handler(mockReq, mockRes, mockNext);
 
@@ -524,7 +524,7 @@ describe('Budget Months Routes', () => {
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/months/:month/nextmonthbudgethold'];
       const error = new Error('failed');
-      mockBudget.resetBudgetHold = jest.fn().mockRejectedValue(error);
+      mockBudget.resetBudgetHold = vi.fn().mockRejectedValue(error);
 
       await handler(mockReq, mockRes, mockNext);
 

@@ -1,15 +1,15 @@
 
-const { currentLocalDate, formatDateToISOString, listSubDirectories, getFileContent } = require('../utils/utils');
-const { getActualApiClient, getActualDataDir } = require('./actual-client-provider');
+const utils = require('../utils/utils');
+const actualClientProvider = require('./actual-client-provider');
+const archiverWrapper = require('./archiver-wrapper');
 
-const archiver = require('archiver');
 const fs = require('fs');
 const path = require('path');
 
 let syncIdToBudgetId = {};
 
 async function Budget(budgetSyncId, budgetEncryptionPassword) {
-  const actualApi = await getActualApiClient();
+  const actualApi = await actualClientProvider.getActualApiClient();
   if (budgetSyncId in syncIdToBudgetId) {
     await actualApi.loadBudget(syncIdToBudgetId[budgetSyncId]);
     await actualApi.sync();
@@ -102,7 +102,7 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
   }
 
   async function getTransactions(accountId, sinceDate, optionalUntilDate) {
-    const untilDate = optionalUntilDate || formatDateToISOString(currentLocalDate());
+    const untilDate = optionalUntilDate || utils.formatDateToISOString(utils.currentLocalDate());
     return actualApi.getTransactions(accountId, sinceDate, untilDate);
   }
 
@@ -356,13 +356,13 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
   function refreshSincIdToBudgetIdMap() {
     // Unfortunately Actual Node.js api doesn't provide functionality to get the
     // budget id associated to the sync id, this is a hack to do that
-    const actualDataDir = getActualDataDir();
+    const actualDataDir = actualClientProvider.getActualDataDir();
     try {
-      const directories = listSubDirectories(actualDataDir);
+      const directories = utils.listSubDirectories(actualDataDir);
       const updated = {};
       directories.forEach(subDir => {
         if (fs.existsSync(path.join(actualDataDir, subDir, 'metadata.json'))) {
-          const metadataRawContent = getFileContent(path.join(actualDataDir, subDir, 'metadata.json'));
+          const metadataRawContent = utils.getFileContent(path.join(actualDataDir, subDir, 'metadata.json'));
           if (metadataRawContent) {
             const metadata = JSON.parse(metadataRawContent);
             updated[metadata.groupId] = metadata.id;
@@ -379,7 +379,7 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
   }
 
   async function exportData(budgetSyncId) {
-    const dataDir = getActualDataDir();
+    const dataDir = actualClientProvider.getActualDataDir();
     // Get the budget name safely
     const budget = (await getBudgets() || [])
       .find(b => b.groupId === budgetSyncId && !!b.id);
@@ -387,7 +387,7 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
       throw new Error(`Budget not found for budget sync id ${budgetSyncId}`);
     }
     // Create the archive
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const archive = archiverWrapper.createArchive('zip', { zlib: { level: 9 } });
     // Add files to the archive
     for (const file of ['db.sqlite', 'metadata.json']) {
       archive.file(path.join(dataDir, budget.id, file), { name: file });

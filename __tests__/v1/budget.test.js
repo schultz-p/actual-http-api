@@ -1,40 +1,23 @@
-// Mock modules before requiring budget
-jest.mock('../../src/config/config.js', () => ({
-  loadMandatorySecret: jest.fn((name) => 'test-secret')
-}));
-
-jest.mock('dotenv');
-jest.mock('../../src/v1/actual-client-provider');
-jest.mock('../../src/utils/utils');
-jest.mock('archiver', () => jest.fn());
-jest.mock('fs');
-jest.mock('path');
-
-const { Budget } = require('../../src/v1/budget');
-const { getActualApiClient, getActualDataDir } = require('../../src/v1/actual-client-provider');
-const { 
-  currentLocalDate, 
-  formatDateToISOString, 
-  listSubDirectories, 
-  getFileContent 
-} = require('../../src/utils/utils');
-const archiver = require('archiver');
-const fs = require('fs');
 const path = require('path');
+const actualClientProvider = require('../../src/v1/actual-client-provider');
+const utils = require('../../src/utils/utils');
+const archiverWrapper = require('../../src/v1/archiver-wrapper');
+
+let Budget;
 
 describe('Budget Module', () => {
   let mockActualApi;
   let mockArchive;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockActualApi = {
-      loadBudget: jest.fn().mockResolvedValue(undefined),
-      sync: jest.fn().mockResolvedValue(undefined),
-      downloadBudget: jest.fn().mockResolvedValue(undefined),
-      getBudgetMonths: jest.fn().mockResolvedValue([]),
-      getBudgetMonth: jest.fn().mockResolvedValue({
+      loadBudget: vi.fn().mockResolvedValue(undefined),
+      sync: vi.fn().mockResolvedValue(undefined),
+      downloadBudget: vi.fn().mockResolvedValue(undefined),
+      getBudgetMonths: vi.fn().mockResolvedValue([]),
+      getBudgetMonth: vi.fn().mockResolvedValue({
         categoryGroups: [
           {
             id: 'cg1',
@@ -45,95 +28,103 @@ describe('Budget Module', () => {
           }
         ]
       }),
-      setBudgetAmount: jest.fn().mockResolvedValue(undefined),
-      setBudgetCarryover: jest.fn().mockResolvedValue(undefined),
-      getAccounts: jest.fn().mockResolvedValue([
+      setBudgetAmount: vi.fn().mockResolvedValue(undefined),
+      setBudgetCarryover: vi.fn().mockResolvedValue(undefined),
+      getAccounts: vi.fn().mockResolvedValue([
         { id: 'acc1', name: 'Checking', balance: 5000 }
       ]),
-      getAccountBalance: jest.fn().mockResolvedValue(5000),
-      createAccount: jest.fn().mockResolvedValue({ id: 'acc2' }),
-      updateAccount: jest.fn().mockResolvedValue({ id: 'acc1', name: 'Updated' }),
-      deleteAccount: jest.fn().mockResolvedValue(undefined),
-      closeAccount: jest.fn().mockResolvedValue(undefined),
-      reopenAccount: jest.fn().mockResolvedValue(undefined),
-      getTransactions: jest.fn().mockResolvedValue([
+      getAccountBalance: vi.fn().mockResolvedValue(5000),
+      createAccount: vi.fn().mockResolvedValue({ id: 'acc2' }),
+      updateAccount: vi.fn().mockResolvedValue({ id: 'acc1', name: 'Updated' }),
+      deleteAccount: vi.fn().mockResolvedValue(undefined),
+      closeAccount: vi.fn().mockResolvedValue(undefined),
+      reopenAccount: vi.fn().mockResolvedValue(undefined),
+      getTransactions: vi.fn().mockResolvedValue([
         { id: 'txn1', amount: 100, payee: 'Store' }
       ]),
-      addTransactions: jest.fn().mockResolvedValue(['txn2']),
-      importTransactions: jest.fn().mockResolvedValue(['txn3']),
-      updateTransaction: jest.fn().mockResolvedValue({ id: 'txn1', amount: 150 }),
-      deleteTransaction: jest.fn().mockResolvedValue(undefined),
-      batchBudgetUpdates: jest.fn().mockImplementation(callback => callback()),
-      getCategories: jest.fn().mockResolvedValue([
+      addTransactions: vi.fn().mockResolvedValue(['txn2']),
+      importTransactions: vi.fn().mockResolvedValue(['txn3']),
+      updateTransaction: vi.fn().mockResolvedValue({ id: 'txn1', amount: 150 }),
+      deleteTransaction: vi.fn().mockResolvedValue(undefined),
+      batchBudgetUpdates: vi.fn().mockImplementation(callback => callback()),
+      getCategories: vi.fn().mockResolvedValue([
         { id: 'cat1', name: 'Groceries' }
       ]),
-      createCategory: jest.fn().mockResolvedValue({ id: 'cat2' }),
-      updateCategory: jest.fn().mockResolvedValue({ id: 'cat1', name: 'Food' }),
-      deleteCategory: jest.fn().mockResolvedValue(undefined),
-      getCategoryGroups: jest.fn().mockResolvedValue([
+      createCategory: vi.fn().mockResolvedValue({ id: 'cat2' }),
+      updateCategory: vi.fn().mockResolvedValue({ id: 'cat1', name: 'Food' }),
+      deleteCategory: vi.fn().mockResolvedValue(undefined),
+      getCategoryGroups: vi.fn().mockResolvedValue([
         { id: 'cg1', name: 'Essential' }
       ]),
-      createCategoryGroup: jest.fn().mockResolvedValue({ id: 'cg2' }),
-      updateCategoryGroup: jest.fn().mockResolvedValue({ id: 'cg1', name: 'Essentials' }),
-      deleteCategoryGroup: jest.fn().mockResolvedValue(undefined),
-      getPayees: jest.fn().mockResolvedValue([
+      createCategoryGroup: vi.fn().mockResolvedValue({ id: 'cg2' }),
+      updateCategoryGroup: vi.fn().mockResolvedValue({ id: 'cg1', name: 'Essentials' }),
+      deleteCategoryGroup: vi.fn().mockResolvedValue(undefined),
+      getPayees: vi.fn().mockResolvedValue([
         { id: 'payee1', name: 'Amazon' }
       ]),
-      createPayee: jest.fn().mockResolvedValue({ id: 'payee2' }),
-      updatePayee: jest.fn().mockResolvedValue({ id: 'payee1', name: 'Amazon Prime' }),
-      deletePayee: jest.fn().mockResolvedValue(undefined),
-      holdBudgetForNextMonth: jest.fn().mockResolvedValue(undefined),
-      resetBudgetHold: jest.fn().mockResolvedValue(undefined),
-      runBankSync: jest.fn().mockResolvedValue(undefined),
-      getRules: jest.fn().mockResolvedValue([
+      createPayee: vi.fn().mockResolvedValue({ id: 'payee2' }),
+      updatePayee: vi.fn().mockResolvedValue({ id: 'payee1', name: 'Amazon Prime' }),
+      deletePayee: vi.fn().mockResolvedValue(undefined),
+      holdBudgetForNextMonth: vi.fn().mockResolvedValue(undefined),
+      resetBudgetHold: vi.fn().mockResolvedValue(undefined),
+      runBankSync: vi.fn().mockResolvedValue(undefined),
+      getRules: vi.fn().mockResolvedValue([
         { id: 'rule1', description: 'Auto-categorize' }
       ]),
-      getPayeeRules: jest.fn().mockResolvedValue([
+      getPayeeRules: vi.fn().mockResolvedValue([
         { id: 'rule1', payeeId: 'payee1' }
       ]),
-      createRule: jest.fn().mockResolvedValue({ id: 'rule2' }),
-      updateRule: jest.fn().mockResolvedValue({ id: 'rule1', description: 'Updated' }),
-      deleteRule: jest.fn().mockResolvedValue(undefined),
-      getSchedules: jest.fn().mockResolvedValue([
+      createRule: vi.fn().mockResolvedValue({ id: 'rule2' }),
+      updateRule: vi.fn().mockResolvedValue({ id: 'rule1', description: 'Updated' }),
+      deleteRule: vi.fn().mockResolvedValue(undefined),
+      getSchedules: vi.fn().mockResolvedValue([
         { id: 'schedule1', name: 'Monthly Rent', amount: -150000 }
       ]),
-      createSchedule: jest.fn().mockResolvedValue('schedule2'),
-      updateSchedule: jest.fn().mockResolvedValue({ id: 'schedule1', name: 'Updated Rent' }),
-      deleteSchedule: jest.fn().mockResolvedValue(undefined),
-      getBudgets: jest.fn().mockResolvedValue([
+      createSchedule: vi.fn().mockResolvedValue('schedule2'),
+      updateSchedule: vi.fn().mockResolvedValue({ id: 'schedule1', name: 'Updated Rent' }),
+      deleteSchedule: vi.fn().mockResolvedValue(undefined),
+      getBudgets: vi.fn().mockResolvedValue([
         { id: 'budget1', groupId: 'sync1', name: 'Personal Budget' }
       ]),
-      getTags: jest.fn().mockResolvedValue([
+      getTags: vi.fn().mockResolvedValue([
         { id: 'tag1', tag: 'important', color: '#ff0000', description: 'Important tag' }
       ]),
-      createTag: jest.fn().mockResolvedValue({ id: 'tag2', tag: 'newtag' }),
-      updateTag: jest.fn().mockResolvedValue({ id: 'tag1', tag: 'updated' }),
-      deleteTag: jest.fn().mockResolvedValue(undefined),
-      shutdown: jest.fn(),
-      q: jest.fn(() => ({
-        filter: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis()
+      createTag: vi.fn().mockResolvedValue({ id: 'tag2', tag: 'newtag' }),
+      updateTag: vi.fn().mockResolvedValue({ id: 'tag1', tag: 'updated' }),
+      deleteTag: vi.fn().mockResolvedValue(undefined),
+      shutdown: vi.fn(),
+      q: vi.fn(() => ({
+        filter: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis()
       })),
-      runQuery: jest.fn(),
+      runQuery: vi.fn(),
     };
 
     mockArchive = {
-      file: jest.fn().mockReturnThis(),
-      finalize: jest.fn().mockResolvedValue(undefined)
+      file: vi.fn().mockReturnThis(),
+      finalize: vi.fn().mockResolvedValue(undefined)
     };
 
-    getActualApiClient.mockResolvedValue(mockActualApi);
-    currentLocalDate.mockReturnValue(new Date('2024-01-15'));
-    formatDateToISOString.mockReturnValue('2024-01-15');
-    listSubDirectories.mockReturnValue(['budget1']);
-    getFileContent.mockReturnValue(JSON.stringify({
+    if (!Budget) {
+      Budget = require('../../src/v1/budget').Budget;
+    }
+
+    vi.spyOn(actualClientProvider, 'getActualApiClient').mockResolvedValue(mockActualApi);
+    vi.spyOn(actualClientProvider, 'getActualDataDir').mockReturnValue('/data/actual');
+    vi.spyOn(utils, 'currentLocalDate').mockReturnValue(new Date('2024-01-15'));
+    vi.spyOn(utils, 'formatDateToISOString').mockReturnValue('2024-01-15');
+    vi.spyOn(utils, 'listSubDirectories').mockReturnValue(['budget1']);
+    vi.spyOn(utils, 'getFileContent').mockReturnValue(JSON.stringify({
       id: 'budget1',
       groupId: 'sync1',
       name: 'Personal Budget'
     }));
-    getActualDataDir.mockReturnValue('/data/actual');
-    archiver.mockReturnValue(mockArchive);
-    path.join.mockImplementation((...args) => args.join('/'));
+    vi.spyOn(archiverWrapper, 'createArchive').mockReturnValue(mockArchive);
+    vi.spyOn(path, 'join').mockImplementation((...args) => args.join('/'));
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('Budget Initialization', () => {
@@ -483,7 +474,7 @@ describe('Budget Module', () => {
     });
 
     it('should merge payees', async () => {
-      mockActualApi.mergePayees = jest.fn().mockResolvedValue(undefined);
+      mockActualApi.mergePayees = vi.fn().mockResolvedValue(undefined);
       await budget.mergePayees('payee1', ['payee2']);
       expect(mockActualApi.mergePayees).toHaveBeenCalledWith('payee1', ['payee2']);
     });

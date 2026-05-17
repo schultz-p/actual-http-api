@@ -7,49 +7,49 @@ describe('Payees Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     handlers = {};
 
     mockRouter = {
-      get: jest.fn((path, handler) => {
+      get: vi.fn((path, handler) => {
         handlers[`GET ${path}`] = handler;
       }),
-      post: jest.fn((path, handler) => {
+      post: vi.fn((path, handler) => {
         handlers[`POST ${path}`] = handler;
       }),
-      patch: jest.fn((path, handler) => {
+      patch: vi.fn((path, handler) => {
         handlers[`PATCH ${path}`] = handler;
       }),
-      delete: jest.fn((path, handler) => {
+      delete: vi.fn((path, handler) => {
         handlers[`DELETE ${path}`] = handler;
       }),
     };
 
     mockBudget = {
-      getPayees: jest.fn().mockResolvedValue([
+      getPayees: vi.fn().mockResolvedValue([
         {
           id: 'payee1',
           name: 'Grocery Store',
           transfer_acct: null,
         },
       ]),
-      getPayee: jest.fn().mockResolvedValue({
+      getPayee: vi.fn().mockResolvedValue({
         id: 'payee1',
         name: 'Grocery Store',
         transfer_acct: null,
       }),
-      createPayee: jest.fn().mockResolvedValue({
+      createPayee: vi.fn().mockResolvedValue({
         id: 'new-payee',
         name: 'New Payee',
       }),
-      updatePayee: jest.fn().mockResolvedValue({
+      updatePayee: vi.fn().mockResolvedValue({
         id: 'payee1',
         name: 'Updated Payee',
       }),
-      deletePayee: jest.fn().mockResolvedValue(undefined),
-      mergePayees: jest.fn().mockResolvedValue(undefined),
+      deletePayee: vi.fn().mockResolvedValue(undefined),
+      mergePayees: vi.fn().mockResolvedValue(undefined),
     };
 
     mockReq = {
@@ -59,21 +59,21 @@ describe('Payees Routes', () => {
     };
 
     mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
       locals: {
         budget: mockBudget,
       },
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
 
     const payeesModule = require('../../../src/v1/routes/payees');
     payeesModule(mockRouter);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/payees', () => {
@@ -289,7 +289,7 @@ describe('Payees Routes', () => {
 
       const handler = handlers['GET /budgets/:budgetSyncId/payees/:payeeId/rules'];
       mockReq.params.payeeId = 'payee1';
-      mockBudget.getPayeeRules = jest.fn().mockResolvedValue([
+      mockBudget.getPayeeRules = vi.fn().mockResolvedValue([
         {
           id: 'rule1',
           conditions: [],
@@ -311,7 +311,7 @@ describe('Payees Routes', () => {
 
       const handler = handlers['GET /budgets/:budgetSyncId/payees/:payeeId/rules'];
       const error = new Error('failed');
-      mockBudget.getPayeeRules = jest.fn().mockRejectedValueOnce(error);
+      mockBudget.getPayeeRules = vi.fn().mockRejectedValueOnce(error);
 
       await handler(mockReq, mockRes, mockNext);
 

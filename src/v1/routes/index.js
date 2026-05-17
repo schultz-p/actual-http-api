@@ -1,15 +1,15 @@
 const express = require('express');
-const { Budget } = require('../budget');
-const { authorizeRequest } = require('../middlewares/api-key-authorization');
-const { errorHandler } = require('../middlewares/error-handler');
+const budgetModule = require('../budget');
+const apiKeyModule = require('../middlewares/api-key-authorization');
+const errorHandlerModule = require('../middlewares/error-handler');
 
 const router = express.Router();
 
-router.use(authorizeRequest);
+router.use((req, res, next) => apiKeyModule.authorizeRequest(req, res, next));
 
 router.use('/budgets/:budgetSyncId', async (req, res, next) => {
     try {
-      res.locals.budget = await Budget(req.params.budgetSyncId, req.get('budget-encryption-password'));
+      res.locals.budget = await budgetModule.Budget(req.params.budgetSyncId, req.get('budget-encryption-password'));
       next();
     } catch(err) {
       next(err);
@@ -28,7 +28,7 @@ require('./run-query')(router);
 require('./tags')(router);
 require('./notes')(router);
 
-router.use(errorHandler);
+router.use((err, req, res, next) => errorHandlerModule.errorHandler(err, req, res, next));
 
 module.exports = router;
 

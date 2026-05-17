@@ -1,4 +1,3 @@
-jest.mock('fs');
 const fs = require('fs');
 const path = require('path');
 const {
@@ -15,12 +14,14 @@ const {
 
 describe('Utils', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createDirIfDoesNotExist', () => {
     it('should create directory if it does not exist', () => {
-      fs.existsSync.mockReturnValue(false);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'mkdirSync').mockReturnValue(undefined);
       const testDir = '/test/dir';
 
       createDirIfDoesNotExist(testDir);
@@ -30,7 +31,8 @@ describe('Utils', () => {
     });
 
     it('should not create directory if it already exists', () => {
-      fs.existsSync.mockReturnValue(true);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'mkdirSync').mockReturnValue(undefined);
       const testDir = '/test/dir';
 
       createDirIfDoesNotExist(testDir);
@@ -109,7 +111,7 @@ describe('Utils', () => {
         { isDirectory: () => false, name: 'file1.txt' },
         { isDirectory: () => true, name: 'dir2' },
       ];
-      fs.readdirSync.mockReturnValue(mockDirents);
+      vi.spyOn(fs, 'readdirSync').mockReturnValue(mockDirents);
 
       const result = listSubDirectories('/test/dir');
 
@@ -122,7 +124,7 @@ describe('Utils', () => {
         { isDirectory: () => false, name: 'file1.txt' },
         { isDirectory: () => false, name: 'file2.txt' },
       ];
-      fs.readdirSync.mockReturnValue(mockDirents);
+      vi.spyOn(fs, 'readdirSync').mockReturnValue(mockDirents);
 
       const result = listSubDirectories('/test/dir');
 
@@ -133,7 +135,7 @@ describe('Utils', () => {
   describe('getFileContent', () => {
     it('should read and return file content', () => {
       const fileContent = 'file content';
-      fs.readFileSync.mockReturnValue(fileContent);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(fileContent);
 
       const result = getFileContent('/test/file.txt');
 
