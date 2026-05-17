@@ -19,7 +19,7 @@ app.use(rateLimit({
   legacyHeaders: false,
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 app.use("/v1", v1Routes);
 
