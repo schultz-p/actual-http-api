@@ -10,7 +10,6 @@ describe('Accounts Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     const aqBuilder = {
       filter() { return this; },
@@ -42,10 +41,6 @@ describe('Accounts Routes', () => {
 
     const accountsModule = require('../../../src/v1/routes/accounts');
     accountsModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/accounts', () => {

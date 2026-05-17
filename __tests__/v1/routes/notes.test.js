@@ -10,7 +10,6 @@ describe('Notes Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     mockBudget = {
       getCategoryNotes: vi.fn(),

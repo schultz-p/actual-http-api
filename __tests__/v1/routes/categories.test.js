@@ -10,7 +10,6 @@ describe('Categories Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     mockBudget = {
       getCategories: vi.fn().mockResolvedValue([
@@ -34,10 +33,6 @@ describe('Categories Routes', () => {
 
     const categoriesModule = require('../../../src/v1/routes/categories');
     categoriesModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/categories', () => {

@@ -10,7 +10,6 @@ describe('Payees Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     mockBudget = {
       getPayees: vi.fn().mockResolvedValue([
@@ -28,10 +27,6 @@ describe('Payees Routes', () => {
 
     const payeesModule = require('../../../src/v1/routes/payees');
     payeesModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/payees', () => {

@@ -15,10 +15,6 @@ describe('API Key Authorization Middleware', () => {
     next = vi.fn();
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
   describe('authorizeRequest', () => {
     it('should call next() if API key matches', async () => {
       config.apiKey = 'valid-key';

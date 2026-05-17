@@ -10,7 +10,6 @@ describe('Budget Months Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     mockBudget = {
       getMonths: vi.fn().mockResolvedValue(['2023-08', '2023-09', '2023-10']),
@@ -48,10 +47,6 @@ describe('Budget Months Routes', () => {
 
     const budgetMonthsModule = require('../../../src/v1/routes/budget-months');
     budgetMonthsModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/months', () => {

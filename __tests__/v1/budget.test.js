@@ -10,8 +10,6 @@ describe('Budget Module', () => {
   let mockArchive;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-
     mockActualApi = {
       loadBudget: vi.fn().mockResolvedValue(undefined),
       sync: vi.fn().mockResolvedValue(undefined),
@@ -121,10 +119,6 @@ describe('Budget Module', () => {
     }));
     vi.spyOn(archiverWrapper, 'createArchive').mockReturnValue(mockArchive);
     vi.spyOn(path, 'join').mockImplementation((...args) => args.join('/'));
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('Budget Initialization', () => {

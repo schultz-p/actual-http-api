@@ -10,7 +10,6 @@ describe('Transactions Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     mockBudget = {
       getAccount: vi.fn().mockResolvedValue({ id: 'acc1', name: 'Checking' }),
@@ -31,10 +30,6 @@ describe('Transactions Routes', () => {
 
     const transactionsModule = require('../../../src/v1/routes/transactions');
     transactionsModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/accounts/:accountId/transactions', () => {

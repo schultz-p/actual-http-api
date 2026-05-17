@@ -10,7 +10,6 @@ describe('Run Query Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     const mockQuery = {
       filter: vi.fn().mockReturnThis(),
@@ -37,10 +36,6 @@ describe('Run Query Routes', () => {
 
     const runQueryModule = require('../../../src/v1/routes/run-query');
     runQueryModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('POST /budgets/:budgetSyncId/run-query', () => {

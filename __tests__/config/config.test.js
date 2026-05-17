@@ -6,14 +6,11 @@ describe('Configuration', () => {
 
   beforeEach(() => {
     originalEnv = { ...process.env };
-    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    // Restore env vars modified by individual tests
     Object.keys(process.env).forEach(k => { if (!(k in originalEnv)) delete process.env[k]; });
     Object.assign(process.env, originalEnv);
-    vi.restoreAllMocks();
   });
 
   describe('loadMandatorySecret', () => {

@@ -10,7 +10,6 @@ describe('Rules Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     mockBudget = {
       getRules: vi.fn().mockResolvedValue([{ id: 'rule1', name: 'Auto-categorize', enabled: true }]),
@@ -25,10 +24,6 @@ describe('Rules Routes', () => {
 
     const rulesModule = require('../../../src/v1/routes/rules');
     rulesModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/rules', () => {

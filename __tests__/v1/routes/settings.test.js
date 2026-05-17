@@ -10,8 +10,6 @@ describe('Settings Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-
     mockBudget = {
       getSettings: vi.fn().mockResolvedValue({ locale: 'en-US', maxMonthsOfHistory: 24 }),
       exportBudget: vi.fn().mockResolvedValue('exported-data'),
@@ -24,10 +22,6 @@ describe('Settings Routes', () => {
 
     const settingsModule = require('../../../src/v1/routes/settings');
     settingsModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets', () => {

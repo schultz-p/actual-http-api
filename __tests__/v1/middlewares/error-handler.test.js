@@ -14,10 +14,6 @@ describe('Error Handler Middleware', () => {
     vi.spyOn(console, 'error').mockImplementation();
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   describe('errorHandler', () => {
     it('should return 500 for PostError with network-failure', () => {
       const err = new Error('network-failure');

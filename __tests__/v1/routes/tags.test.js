@@ -10,7 +10,6 @@ describe('Tags Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     mockBudget = {
       getTags: vi.fn().mockResolvedValue([

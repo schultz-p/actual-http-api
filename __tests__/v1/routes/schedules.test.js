@@ -20,7 +20,6 @@ describe('Schedules Routes', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
 
     mockBudget = {
       getSchedules: vi.fn().mockResolvedValue([scheduleFixture]),
@@ -35,10 +34,6 @@ describe('Schedules Routes', () => {
 
     const schedulesModule = require('../../../src/v1/routes/schedules');
     schedulesModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/schedules', () => {
