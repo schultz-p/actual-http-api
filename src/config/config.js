@@ -37,6 +37,5 @@ exports.config = {
     customConfigProvided: !!(process.env.SWAGGER_PROTOCOL || process.env.SWAGGER_HOST || process.env.SWAGGER_PORT || process.env.SWAGGER_BASE_PATH),
   },
   // Experimental/unofficial operations are enabled by default; set EXPERIMENTAL_OPERATIONS_ENABLED=false to disable.
-  // The test environment always has them enabled so tests don't need to set the variable.
-  experimentalOperationsEnabled: process.env.EXPERIMENTAL_OPERATIONS_ENABLED !== 'false' || process.env.NODE_ENV === 'test',
+  experimentalOperationsEnabled: process.env.EXPERIMENTAL_OPERATIONS_ENABLED !== 'false',
 };
