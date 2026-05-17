@@ -27,6 +27,7 @@ describe('Configuration', () => {
     });
 
     it('should load secret from file path', () => {
+      delete process.env.API_KEY;
       process.env.API_KEY_PATH = '/path/to/secret';
       process.env.ACTUAL_SERVER_PASSWORD = 'test-password';
       const fs = require('fs');
@@ -62,6 +63,7 @@ describe('Configuration', () => {
     });
 
     it('should throw error if file read fails', () => {
+      delete process.env.API_KEY;
       process.env.API_KEY_PATH = '/invalid/path';
       process.env.ACTUAL_SERVER_PASSWORD = 'test-password';
       const fs = require('fs');

@@ -1,6 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
 const { authorizeRequest } = require('../../../src/v1/middlewares/api-key-authorization');
 const { config } = require('../../../src/config/config');
 

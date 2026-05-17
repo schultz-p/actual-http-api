@@ -1,7 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-
 describe('Categories Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -11,7 +7,6 @@ describe('Categories Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.resetModules();
     jest.clearAllMocks();
 
@@ -94,17 +89,17 @@ describe('Categories Routes', () => {
     };
 
     mockNext = jest.fn();
+
+    const categoriesModule = require('../../../src/v1/routes/categories');
+    categoriesModule(mockRouter);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.clearAllTimers();
   });
 
   describe('GET /budgets/:budgetSyncId/categories', () => {
     it('should register the route', () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/categories',
@@ -113,8 +108,6 @@ describe('Categories Routes', () => {
     });
 
     it('should return list of categories', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/categories'];
       await handler(mockReq, mockRes, mockNext);
@@ -128,8 +121,6 @@ describe('Categories Routes', () => {
     });
 
     it('should handle errors from getCategories', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/categories'];
       const error = new Error('failed');
@@ -143,8 +134,6 @@ describe('Categories Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/categories/:categoryId', () => {
     it('should register the route', () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/categories/:categoryId',
@@ -153,8 +142,6 @@ describe('Categories Routes', () => {
     });
 
     it('should return specific category', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/categories/:categoryId'];
       mockReq.params.categoryId = 'cat1';
@@ -168,8 +155,6 @@ describe('Categories Routes', () => {
     });
 
     it('should reject for nonexistent category', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/categories/:categoryId'];
       mockReq.params.categoryId = 'nonexistent';
@@ -183,8 +168,6 @@ describe('Categories Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/categories', () => {
     it('should register the route', () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/categories',
@@ -193,8 +176,6 @@ describe('Categories Routes', () => {
     });
 
     it('should create a category', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/categories'];
       mockReq.body = {
@@ -213,8 +194,6 @@ describe('Categories Routes', () => {
     });
 
     it('should reject without category property', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/categories'];
       mockReq.body = {};
@@ -227,8 +206,6 @@ describe('Categories Routes', () => {
 
   describe('PATCH /budgets/:budgetSyncId/categories/:categoryId', () => {
     it('should register the route', () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       expect(mockRouter.patch).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/categories/:categoryId',
@@ -237,8 +214,6 @@ describe('Categories Routes', () => {
     });
 
     it('should update a category', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/categories/:categoryId'];
       mockReq.params.categoryId = 'cat1';
@@ -258,8 +233,6 @@ describe('Categories Routes', () => {
     });
 
     it('should reject for nonexistent category', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/categories/:categoryId'];
       mockReq.params.categoryId = 'nonexistent';
@@ -274,8 +247,6 @@ describe('Categories Routes', () => {
 
   describe('DELETE /budgets/:budgetSyncId/categories/:categoryId', () => {
     it('should register the route', () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       expect(mockRouter.delete).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/categories/:categoryId',
@@ -284,8 +255,6 @@ describe('Categories Routes', () => {
     });
 
     it('should delete a category', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/categories/:categoryId'];
       mockReq.params.categoryId = 'cat1';
@@ -305,8 +274,6 @@ describe('Categories Routes', () => {
     });
 
     it('should reject for nonexistent category', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/categories/:categoryId'];
       mockReq.params.categoryId = 'nonexistent';
@@ -320,8 +287,6 @@ describe('Categories Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/categorygroups', () => {
     it('should register the route', () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/categorygroups',
@@ -330,8 +295,6 @@ describe('Categories Routes', () => {
     });
 
     it('should return list of category groups', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/categorygroups'];
       await handler(mockReq, mockRes, mockNext);
@@ -345,8 +308,6 @@ describe('Categories Routes', () => {
     });
 
     it('should handle errors from getCategoryGroups', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/categorygroups'];
       const error = new Error('failed');
@@ -358,8 +319,6 @@ describe('Categories Routes', () => {
     });
 
     it('should treat null getCategoryGroups response as empty list', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/categorygroups'];
       mockBudget.getCategoryGroups.mockResolvedValueOnce(null);
@@ -370,8 +329,6 @@ describe('Categories Routes', () => {
     });
 
     it('should transform nested categories within each group', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/categorygroups'];
       mockBudget.getCategoryGroups.mockResolvedValueOnce([{
@@ -406,8 +363,6 @@ describe('Categories Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/categorygroups', () => {
     it('should register the route', () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/categorygroups',
@@ -416,8 +371,6 @@ describe('Categories Routes', () => {
     });
 
     it('should create a category group', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/categorygroups'];
       mockReq.body = {
@@ -436,8 +389,6 @@ describe('Categories Routes', () => {
     });
 
     it('should reject without category_group property', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/categorygroups'];
       mockReq.body = {};
@@ -449,8 +400,6 @@ describe('Categories Routes', () => {
     });
 
     it('should handle errors from createCategoryGroup', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/categorygroups'];
       mockReq.body = { category_group: { name: 'New Group' } };
@@ -465,8 +414,6 @@ describe('Categories Routes', () => {
 
   describe('PATCH /budgets/:budgetSyncId/categorygroups/:categoryGroupId', () => {
     it('should register the route', () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       expect(mockRouter.patch).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/categorygroups/:categoryGroupId',
@@ -475,8 +422,6 @@ describe('Categories Routes', () => {
     });
 
     it('should update a category group', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/categorygroups/:categoryGroupId'];
       mockReq.params.categoryGroupId = 'grp1';
@@ -495,8 +440,6 @@ describe('Categories Routes', () => {
     });
 
     it('should handle errors from updateCategoryGroup', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/categorygroups/:categoryGroupId'];
       mockReq.body = { category_group: { name: 'Updated Group' } };
@@ -511,8 +454,6 @@ describe('Categories Routes', () => {
 
   describe('DELETE /budgets/:budgetSyncId/categorygroups/:categoryGroupId', () => {
     it('should register the route', () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       expect(mockRouter.delete).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/categorygroups/:categoryGroupId',
@@ -521,8 +462,6 @@ describe('Categories Routes', () => {
     });
 
     it('should delete a category group', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/categorygroups/:categoryGroupId'];
       mockReq.params.categoryGroupId = 'grp1';
@@ -539,8 +478,6 @@ describe('Categories Routes', () => {
     });
 
     it('should handle errors from deleteCategoryGroup', async () => {
-      const categoriesModule = require('../../../src/v1/routes/categories');
-      categoriesModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/categorygroups/:categoryGroupId'];
       const error = new Error('failed');

@@ -1,7 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-
 const request = require('supertest');
 const express = require('express');
 
@@ -32,7 +28,7 @@ describe('index.js router', () => {
     return app;
   }
 
-  test('budget middleware loads budget into res.locals', async () => {
+  it('budget middleware loads budget into res.locals', async () => {
     const { Budget } = require('../../../src/v1/budget');
     Budget.mockResolvedValue({ ok: true });
 
@@ -45,7 +41,7 @@ describe('index.js router', () => {
     expect(Budget).toHaveBeenCalledWith('abc123', 'pw123');
   });
 
-  test('authorizeRequest is called for every request', async () => {
+  it('authorizeRequest is called for every request', async () => {
     const { Budget } = require('../../../src/v1/budget');
     Budget.mockResolvedValue({ ok: true });
 
@@ -55,13 +51,13 @@ describe('index.js router', () => {
     expect(mockAuthorizeRequest).toHaveBeenCalled();
   });
 
-  test('authorizeRequest is called for /budgets listing route', async () => {
+  it('authorizeRequest is called for /budgets listing route', async () => {
     const app = createApp();
     await request(app).get('/budgets');
     expect(mockAuthorizeRequest).toHaveBeenCalled();
   });
 
-  test('error pipeline works when Budget throws', async () => {
+  it('error pipeline works when Budget throws', async () => {
     const { Budget } = require('../../../src/v1/budget');
     Budget.mockRejectedValue(new Error('Boom!'));
 

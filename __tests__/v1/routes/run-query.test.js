@@ -1,7 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-
 describe('Run Query Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -11,7 +7,6 @@ describe('Run Query Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.resetModules();
     jest.clearAllMocks();
 
@@ -74,18 +69,17 @@ describe('Run Query Routes', () => {
     };
 
     mockNext = jest.fn();
+
+    const runQueryModule = require('../../../src/v1/routes/run-query');
+    runQueryModule(mockRouter);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.clearAllTimers();
   });
 
   describe('POST /budgets/:budgetSyncId/run-query', () => {
     it('should register the route', () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/run-query',
         expect.any(Function)
@@ -93,9 +87,6 @@ describe('Run Query Routes', () => {
     });
 
     it('should construct and run the query with multiple filters and flags', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       const queryParams = {
         table: 'transactions',
@@ -126,9 +117,6 @@ describe('Run Query Routes', () => {
     });
 
     it('should wrap a single filter object in an array', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       const queryParams = {
         table: 'transactions',
@@ -144,9 +132,6 @@ describe('Run Query Routes', () => {
     });
 
     it('should support withDead and withoutValidatedRefs flags', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       const queryParams = {
         table: 'transactions',
@@ -167,9 +152,6 @@ describe('Run Query Routes', () => {
     });
 
     it('should support calculate method', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       const queryParams = {
         table: 'transactions',
@@ -188,9 +170,6 @@ describe('Run Query Routes', () => {
     });
 
     it('should support unfilter method', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       const queryParams = {
         table: 'transactions',
@@ -209,9 +188,6 @@ describe('Run Query Routes', () => {
     });
 
     it('should throw error if ActualQLquery is missing', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       mockReq.body = {}; // Missing ActualQLquery
 
@@ -222,9 +198,6 @@ describe('Run Query Routes', () => {
     });
 
     it('should throw error if table is missing', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       mockReq.body = {
         ActualQLquery: { filter: {} } // Missing table
@@ -237,9 +210,6 @@ describe('Run Query Routes', () => {
     });
 
     it('should throw error if table is not in the allowed list', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       mockReq.body = { ActualQLquery: { table: 'kv_blobs' } };
 
@@ -250,9 +220,6 @@ describe('Run Query Routes', () => {
     });
 
     it('should handle errors from runQuery', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
-      runQueryModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       mockReq.body = {
         ActualQLquery: { table: 'transactions' }
@@ -266,9 +233,7 @@ describe('Run Query Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const runQueryModule = require('../../../src/v1/routes/run-query');
       const configModule = require('../../../src/config/config');
-      runQueryModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
       const original = configModule.config.experimentalOperationsEnabled;

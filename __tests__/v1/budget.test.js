@@ -1,7 +1,3 @@
-// Mock environment variables first
-process.env.NODE_ENV = 'test';
-process.env.API_KEY = 'test-key';
-
 // Mock modules before requiring budget
 jest.mock('../../src/config/config.js', () => ({
   loadMandatorySecret: jest.fn((name) => 'test-secret')

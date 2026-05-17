@@ -1,7 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-
 describe('Payees Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -11,7 +7,6 @@ describe('Payees Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.resetModules();
     jest.clearAllMocks();
 
@@ -72,17 +67,17 @@ describe('Payees Routes', () => {
     };
 
     mockNext = jest.fn();
+
+    const payeesModule = require('../../../src/v1/routes/payees');
+    payeesModule(mockRouter);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.clearAllTimers();
   });
 
   describe('GET /budgets/:budgetSyncId/payees', () => {
     it('should register the route', () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/payees',
@@ -91,8 +86,6 @@ describe('Payees Routes', () => {
     });
 
     it('should return list of payees', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/payees'];
       await handler(mockReq, mockRes, mockNext);
@@ -106,8 +99,6 @@ describe('Payees Routes', () => {
     });
 
     it('should handle errors from getPayees', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/payees'];
       const error = new Error('Failed to fetch payees');
@@ -121,8 +112,6 @@ describe('Payees Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/payees/:payeeId', () => {
     it('should register the route', () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/payees/:payeeId',
@@ -131,8 +120,6 @@ describe('Payees Routes', () => {
     });
 
     it('should return specific payee', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/payees/:payeeId'];
       mockReq.params.payeeId = 'payee1';
@@ -150,8 +137,6 @@ describe('Payees Routes', () => {
     });
 
     it('should reject for nonexistent payee', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/payees/:payeeId'];
       mockReq.params.payeeId = 'nonexistent';
@@ -165,8 +150,6 @@ describe('Payees Routes', () => {
     });
 
     it('should treat null getPayees response as empty list', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/payees/:payeeId'];
       mockReq.params.payeeId = 'payee1';
@@ -180,8 +163,6 @@ describe('Payees Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/payees', () => {
     it('should register the route', () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/payees',
@@ -190,8 +171,6 @@ describe('Payees Routes', () => {
     });
 
     it('should create a payee', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/payees'];
       mockReq.body = {
@@ -209,8 +188,6 @@ describe('Payees Routes', () => {
     });
 
     it('should reject without payee property', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/payees'];
       mockReq.body = {};
@@ -225,8 +202,6 @@ describe('Payees Routes', () => {
 
   describe('PATCH /budgets/:budgetSyncId/payees/:payeeId', () => {
     it('should register the route', () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       expect(mockRouter.patch).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/payees/:payeeId',
@@ -235,8 +210,6 @@ describe('Payees Routes', () => {
     });
 
     it('should update a payee', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/payees/:payeeId'];
       mockReq.params.payeeId = 'payee1';
@@ -255,8 +228,6 @@ describe('Payees Routes', () => {
     });
 
     it('should reject for nonexistent payee', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['PATCH /budgets/:budgetSyncId/payees/:payeeId'];
       mockReq.params.payeeId = 'nonexistent';
@@ -272,8 +243,6 @@ describe('Payees Routes', () => {
 
   describe('DELETE /budgets/:budgetSyncId/payees/:payeeId', () => {
     it('should register the route', () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       expect(mockRouter.delete).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/payees/:payeeId',
@@ -282,8 +251,6 @@ describe('Payees Routes', () => {
     });
 
     it('should delete a payee', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/payees/:payeeId'];
       mockReq.params.payeeId = 'payee1';
@@ -297,8 +264,6 @@ describe('Payees Routes', () => {
     });
 
     it('should reject for nonexistent payee', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['DELETE /budgets/:budgetSyncId/payees/:payeeId'];
       mockReq.params.payeeId = 'nonexistent';
@@ -313,8 +278,6 @@ describe('Payees Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/payees/:payeeId/rules', () => {
     it('should register the route', () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/payees/:payeeId/rules',
@@ -323,8 +286,6 @@ describe('Payees Routes', () => {
     });
 
     it('should return rules for a payee', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/payees/:payeeId/rules'];
       mockReq.params.payeeId = 'payee1';
@@ -347,8 +308,6 @@ describe('Payees Routes', () => {
     });
 
     it('should handle errors from getPayeeRules', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['GET /budgets/:budgetSyncId/payees/:payeeId/rules'];
       const error = new Error('failed');
@@ -362,8 +321,6 @@ describe('Payees Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/payees/merge', () => {
     it('should register the route', () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/payees/merge',
@@ -372,8 +329,6 @@ describe('Payees Routes', () => {
     });
 
     it('should merge payees', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/payees/merge'];
       mockReq.body = {
@@ -390,8 +345,6 @@ describe('Payees Routes', () => {
     });
 
     it('should merge multiple payees', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/payees/merge'];
       mockReq.body = {
@@ -408,8 +361,6 @@ describe('Payees Routes', () => {
     });
 
     it('should reject with missing parameters', async () => {
-      const payeesModule = require('../../../src/v1/routes/payees');
-      payeesModule(mockRouter);
 
       const handler = handlers['POST /budgets/:budgetSyncId/payees/merge'];
       mockReq.body = { targetId: 'payee1' }; // missing mergeIds

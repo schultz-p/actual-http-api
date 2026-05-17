@@ -1,7 +1,3 @@
-// Ensure required secrets exist before importing modules that load config at module initialization
-process.env.API_KEY = process.env.API_KEY || 'test-api-key';
-process.env.ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD || 'test-password';
-
 describe('Schedules Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -11,7 +7,6 @@ describe('Schedules Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.resetModules();
     jest.clearAllMocks();
 
@@ -77,18 +72,17 @@ describe('Schedules Routes', () => {
     };
 
     mockNext = jest.fn();
+
+    const schedulesModule = require('../../../src/v1/routes/schedules');
+    schedulesModule(mockRouter);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.clearAllTimers();
   });
 
   describe('GET /budgets/:budgetSyncId/schedules', () => {
     it('should register the route', () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/schedules',
         expect.any(Function)
@@ -96,9 +90,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should return list of schedules', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/schedules'];
       await handler(mockReq, mockRes, mockNext);
 
@@ -111,9 +102,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should support pagination', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/schedules'];
       mockReq.query.page = '1';
       mockReq.query.limit = '10';
@@ -125,9 +113,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should handle errors from getSchedules', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/schedules'];
       const error = new Error('Failed to fetch schedules');
       mockBudget.getSchedules.mockRejectedValueOnce(error);
@@ -140,9 +125,6 @@ describe('Schedules Routes', () => {
 
   describe('GET /budgets/:budgetSyncId/schedules/:scheduleId', () => {
     it('should register the route', () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       expect(mockRouter.get).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/schedules/:scheduleId',
         expect.any(Function)
@@ -150,9 +132,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should return specific schedule', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/schedules/:scheduleId'];
       mockReq.params.scheduleId = 'schedule1';
 
@@ -165,9 +144,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should handle not found schedule', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['GET /budgets/:budgetSyncId/schedules/:scheduleId'];
       mockReq.params.scheduleId = 'nonexistent';
       mockBudget.getSchedule.mockResolvedValueOnce(undefined);
@@ -180,9 +156,6 @@ describe('Schedules Routes', () => {
 
   describe('POST /budgets/:budgetSyncId/schedules', () => {
     it('should register the route', () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       expect(mockRouter.post).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/schedules',
         expect.any(Function)
@@ -190,9 +163,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should create a schedule', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/schedules'];
       mockReq.body = {
         schedule: {
@@ -211,9 +181,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should reject without schedule property', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['POST /budgets/:budgetSyncId/schedules'];
       mockReq.body = {};
 
@@ -225,9 +192,6 @@ describe('Schedules Routes', () => {
 
   describe('PATCH /budgets/:budgetSyncId/schedules/:scheduleId', () => {
     it('should register the route', () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       expect(mockRouter.patch).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/schedules/:scheduleId',
         expect.any(Function)
@@ -235,9 +199,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should update a schedule', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['PATCH /budgets/:budgetSyncId/schedules/:scheduleId'];
       mockReq.params.scheduleId = 'schedule1';
       mockReq.body = {
@@ -256,9 +217,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should reject without schedule property', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['PATCH /budgets/:budgetSyncId/schedules/:scheduleId'];
       mockReq.params.scheduleId = 'schedule1';
       mockReq.body = {};
@@ -269,9 +227,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should handle update errors', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['PATCH /budgets/:budgetSyncId/schedules/:scheduleId'];
       mockReq.params.scheduleId = 'nonexistent';
       mockReq.body = { schedule: { name: 'Updated' } };
@@ -286,9 +241,6 @@ describe('Schedules Routes', () => {
 
   describe('DELETE /budgets/:budgetSyncId/schedules/:scheduleId', () => {
     it('should register the route', () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       expect(mockRouter.delete).toHaveBeenCalledWith(
         '/budgets/:budgetSyncId/schedules/:scheduleId',
         expect.any(Function)
@@ -296,9 +248,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should delete a schedule', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['DELETE /budgets/:budgetSyncId/schedules/:scheduleId'];
       mockReq.params.scheduleId = 'schedule1';
 
@@ -311,9 +260,6 @@ describe('Schedules Routes', () => {
     });
 
     it('should handle delete errors', async () => {
-      const schedulesModule = require('../../../src/v1/routes/schedules');
-      schedulesModule(mockRouter);
-
       const handler = handlers['DELETE /budgets/:budgetSyncId/schedules/:scheduleId'];
       mockReq.params.scheduleId = 'nonexistent';
       const error = new Error('Schedule not found');
