@@ -7,7 +7,6 @@ describe('Accounts Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.useFakeTimers();
     vi.resetModules();
     vi.clearAllMocks();
 
@@ -108,7 +107,6 @@ describe('Accounts Routes', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-    vi.clearAllTimers();
   });
 
   describe('GET /budgets/:budgetSyncId/accounts', () => {
