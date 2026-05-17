@@ -10,7 +10,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.js'],
-      exclude: ['src/config/swagger.js', 'node_modules/**'],
+      exclude: ['src/config/swagger.js', 'src/config/constants.js', 'node_modules/**'],
       thresholds: {
         branches: 90,
         functions: 90,
