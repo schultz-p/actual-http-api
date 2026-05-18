@@ -1,4 +1,8 @@
 const actualClientProvider = require('../../../src/v1/actual-client-provider');
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+vi.mock('../../../src/config/config', () => ({ config: { experimentalOperationsEnabled: true } }));
+const { config } = require('../../../src/config/config');
+const settingsModule = require('../../../src/v1/routes/settings');
 
 describe('Settings Routes', () => {
   let mockRouter;
@@ -9,51 +13,18 @@ describe('Settings Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-    };
+    config.experimentalOperationsEnabled = true;
 
     mockBudget = {
-      getSettings: vi.fn().mockResolvedValue({
-        locale: 'en-US',
-        maxMonthsOfHistory: 24,
-      }),
+      getSettings: vi.fn().mockResolvedValue({ locale: 'en-US', maxMonthsOfHistory: 24 }),
       exportBudget: vi.fn().mockResolvedValue('exported-data'),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      setHeader: vi.fn().mockReturnThis(),
-      end: vi.fn(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
-
-    const settingsModule = require('../../../src/v1/routes/settings');
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
+    mockRes.setHeader = vi.fn().mockReturnThis();
+    mockRes.end = vi.fn();
     settingsModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets', () => {
@@ -99,6 +70,16 @@ describe('Settings Routes', () => {
 
       expect(mockRes.json).toHaveBeenCalledWith({ data: { version: pkg.version } });
       expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should call next when res.json throws', async () => {
+      const handler = handlers['GET /actualhttpapiversion'];
+      const error = new Error('serialization error');
+      mockRes.json.mockImplementationOnce(() => { throw error; });
+
+      await handler(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 
@@ -202,15 +183,10 @@ describe('Settings Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['GET /budgets/:budgetSyncId/export'];
-      await handler(mockReq, mockRes, mockNext);
 
-      configModule.config.experimentalOperationsEnabled = original;
+      await handler(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockRes.json).toHaveBeenCalledWith(

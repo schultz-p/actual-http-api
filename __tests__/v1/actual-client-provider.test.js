@@ -15,7 +15,6 @@ describe('Actual Client Provider', () => {
 
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.clearAllMocks();
 
     vi.spyOn(actualApiModule, 'init').mockResolvedValue(undefined);
     vi.spyOn(actualApiModule, 'shutdown').mockResolvedValue(undefined);
@@ -37,10 +36,7 @@ describe('Actual Client Provider', () => {
   });
 
   afterEach(async () => {
-    // Expire the TTL to trigger shutdown and reset the singleton (actualApi = null)
-    // so the next test starts with a clean slate.
     await vi.advanceTimersByTimeAsync(60 * 60 * 1000);
-    vi.restoreAllMocks();
     vi.clearAllTimers();
   });
 

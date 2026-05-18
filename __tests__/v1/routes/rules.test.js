@@ -1,3 +1,6 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const rulesModule = require('../../../src/v1/routes/rules');
+
 describe('Rules Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -7,72 +10,17 @@ describe('Rules Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
-
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-    };
-
     mockBudget = {
-      getRules: vi.fn().mockResolvedValue([
-        {
-          id: 'rule1',
-          name: 'Auto-categorize',
-          enabled: true,
-        },
-      ]),
-      getRule: vi.fn().mockResolvedValue({
-        id: 'rule1',
-        name: 'Auto-categorize',
-        enabled: true,
-      }),
-      createRule: vi.fn().mockResolvedValue({
-        id: 'new-rule',
-        name: 'New Rule',
-      }),
-      updateRule: vi.fn().mockResolvedValue({
-        id: 'rule1',
-        name: 'Updated Rule',
-      }),
+      getRules: vi.fn().mockResolvedValue([{ id: 'rule1', name: 'Auto-categorize', enabled: true }]),
+      getRule: vi.fn().mockResolvedValue({ id: 'rule1', name: 'Auto-categorize', enabled: true }),
+      createRule: vi.fn().mockResolvedValue({ id: 'new-rule', name: 'New Rule' }),
+      updateRule: vi.fn().mockResolvedValue({ id: 'rule1', name: 'Updated Rule' }),
       deleteRule: vi.fn().mockResolvedValue(undefined),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
-
-    const rulesModule = require('../../../src/v1/routes/rules');
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
     rulesModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/rules', () => {

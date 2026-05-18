@@ -10,16 +10,11 @@ describe('index.js router', () => {
   let mockBudget, mockAuthorizeRequest, mockErrorHandler;
 
   beforeEach(() => {
-    vi.clearAllMocks();
     mockBudget = vi.spyOn(budgetModule, 'Budget');
     mockAuthorizeRequest = vi.spyOn(apiKeyModule, 'authorizeRequest').mockImplementation((req, res, next) => next());
     mockErrorHandler = vi.spyOn(errorHandlerModule, 'errorHandler').mockImplementation((err, req, res, next) => {
       res.status(500).json({ error: err.message });
     });
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   function createApp() {

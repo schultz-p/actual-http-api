@@ -1,3 +1,8 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+vi.mock('../../../src/config/config', () => ({ config: { experimentalOperationsEnabled: true } }));
+const { config } = require('../../../src/config/config');
+const runQueryModule = require('../../../src/v1/routes/run-query');
+
 describe('Run Query Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -7,32 +12,8 @@ describe('Run Query Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
+    config.experimentalOperationsEnabled = true;
 
-    // Track all registered route handlers
-    handlers = {};
-
-    // Create a mock express router that tracks handlers
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-      put: vi.fn((path, handler) => {
-        handlers[`PUT ${path}`] = handler;
-      }),
-    };
-
-    // Create a comprehensive mock budget object
     const mockQuery = {
       filter: vi.fn().mockReturnThis(),
       unfilter: vi.fn().mockReturnThis(),
@@ -53,29 +34,9 @@ describe('Run Query Routes', () => {
       runQuery: vi.fn().mockResolvedValue({ data: { some: 'data' } }),
     };
 
-    // Create mock request/response objects
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
-
-    const runQueryModule = require('../../../src/v1/routes/run-query');
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
     runQueryModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('POST /budgets/:budgetSyncId/run-query', () => {
@@ -233,15 +194,11 @@ describe('Run Query Routes', () => {
     });
 
     it('should return 501 when experimental operations are disabled', async () => {
-      const configModule = require('../../../src/config/config');
-
+      config.experimentalOperationsEnabled = false;
       const handler = handlers['POST /budgets/:budgetSyncId/run-query'];
-      const original = configModule.config.experimentalOperationsEnabled;
-      configModule.config.experimentalOperationsEnabled = false;
 
       mockReq.body = { ActualQLquery: { table: 'transactions' } };
       await handler(mockReq, mockRes, mockNext);
-      configModule.config.experimentalOperationsEnabled = original;
 
       expect(mockRes.status).toHaveBeenCalledWith(501);
       expect(mockNext).not.toHaveBeenCalled();

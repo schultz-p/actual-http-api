@@ -1,3 +1,6 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const accountsModule = require('../../../src/v1/routes/accounts');
+
 describe('Accounts Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -7,34 +10,6 @@ describe('Accounts Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.resetModules();
-    vi.clearAllMocks();
-
-    // Track all registered route handlers
-    handlers = {};
-
-    // Create a mock express router that tracks handlers
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-      put: vi.fn((path, handler) => {
-        handlers[`PUT ${path}`] = handler;
-      }),
-    };
-
-    // Create a comprehensive mock budget object
-    // Provide a chainable Actual-QL builder mock for `q(...)` so route code can call .filter/.groupBy/.orderBy/.select/.calculate
     const aqBuilder = {
       filter() { return this; },
       groupBy() { return this; },
@@ -45,70 +20,24 @@ describe('Accounts Routes', () => {
 
     mockBudget = {
       getAccounts: vi.fn().mockResolvedValue([
-        {
-          id: 'acc1',
-          name: 'Checking',
-          offbudget: false,
-          closed: false,
-        },
-        {
-          id: 'acc2',
-          name: 'Savings',
-          offbudget: false,
-          closed: false,
-        },
+        { id: 'acc1', name: 'Checking', offbudget: false, closed: false },
+        { id: 'acc2', name: 'Savings', offbudget: false, closed: false },
       ]),
-      getAccount: vi.fn().mockResolvedValue({
-        id: 'acc1',
-        name: 'Checking',
-        offbudget: false,
-        closed: false,
-      }),
+      getAccount: vi.fn().mockResolvedValue({ id: 'acc1', name: 'Checking', offbudget: false, closed: false }),
       getAccountBalance: vi.fn().mockResolvedValue(5000),
-      createAccount: vi.fn().mockResolvedValue({
-        id: 'new-acc',
-        name: 'New Account',
-        offbudget: false,
-        closed: false,
-      }),
-      updateAccount: vi.fn().mockResolvedValue({
-        id: 'acc1',
-        name: 'Checking Updated',
-        offbudget: false,
-      }),
+      createAccount: vi.fn().mockResolvedValue({ id: 'new-acc', name: 'New Account', offbudget: false, closed: false }),
+      updateAccount: vi.fn().mockResolvedValue({ id: 'acc1', name: 'Checking Updated', offbudget: false }),
       deleteAccount: vi.fn().mockResolvedValue(undefined),
       closeAccount: vi.fn().mockResolvedValue(undefined),
       reopenAccount: vi.fn().mockResolvedValue(undefined),
       runBankSync: vi.fn().mockResolvedValue(undefined),
-      // Actual-QL helpers used by the new balancehistory implementation
       q: vi.fn().mockReturnValue(aqBuilder),
       runQuery: vi.fn(),
     };
 
-    // Create mock request/response objects
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
-
-    const accountsModule = require('../../../src/v1/routes/accounts');
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
     accountsModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-    vi.clearAllTimers();
   });
 
   describe('GET /budgets/:budgetSyncId/accounts', () => {
@@ -275,12 +204,11 @@ describe('Accounts Routes', () => {
       mockReq.params.accountId = 'acc1';
       mockReq.query.since_date = '2023-08-01';
       mockReq.query.until_date = '2023-08-03';
-      // mock runQuery responses: first call -> startingBalance, second -> grouped per-day sums
       mockBudget.runQuery
         .mockResolvedValueOnce({ data: 0 })
         .mockResolvedValueOnce({ data: [
           { date: '2023-08-01', amount: 1000 },
-          { date: '2023-08-02', amount: 0 },    // zero amount exercises row.amount || 0 branch
+          { date: '2023-08-02', amount: 0 },
           { date: '2023-08-03', amount: -50 },
         ] });
 
@@ -302,8 +230,8 @@ describe('Accounts Routes', () => {
       mockReq.query.since_date = '2023-08-01';
       mockReq.query.until_date = '2023-08-02';
       mockBudget.runQuery
-        .mockResolvedValueOnce({ data: 500 })   // non-zero starting balance (truthy branch of line 74)
-        .mockResolvedValueOnce({ data: null });  // null grouped data (falsy branch of line 86 → || [])
+        .mockResolvedValueOnce({ data: 500 })
+        .mockResolvedValueOnce({ data: null });
 
       await handler(mockReq, mockRes, mockNext);
 

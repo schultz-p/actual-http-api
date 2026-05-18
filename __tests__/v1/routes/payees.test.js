@@ -1,3 +1,6 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const payeesModule = require('../../../src/v1/routes/payees');
+
 describe('Payees Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -7,73 +10,20 @@ describe('Payees Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
-
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-    };
-
     mockBudget = {
       getPayees: vi.fn().mockResolvedValue([
-        {
-          id: 'payee1',
-          name: 'Grocery Store',
-          transfer_acct: null,
-        },
+        { id: 'payee1', name: 'Grocery Store', transfer_acct: null },
       ]),
-      getPayee: vi.fn().mockResolvedValue({
-        id: 'payee1',
-        name: 'Grocery Store',
-        transfer_acct: null,
-      }),
-      createPayee: vi.fn().mockResolvedValue({
-        id: 'new-payee',
-        name: 'New Payee',
-      }),
-      updatePayee: vi.fn().mockResolvedValue({
-        id: 'payee1',
-        name: 'Updated Payee',
-      }),
+      getPayee: vi.fn().mockResolvedValue({ id: 'payee1', name: 'Grocery Store', transfer_acct: null }),
+      createPayee: vi.fn().mockResolvedValue({ id: 'new-payee', name: 'New Payee' }),
+      updatePayee: vi.fn().mockResolvedValue({ id: 'payee1', name: 'Updated Payee' }),
       deletePayee: vi.fn().mockResolvedValue(undefined),
       mergePayees: vi.fn().mockResolvedValue(undefined),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
-
-    const payeesModule = require('../../../src/v1/routes/payees');
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
     payeesModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/payees', () => {

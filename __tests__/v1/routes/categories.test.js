@@ -1,3 +1,6 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const categoriesModule = require('../../../src/v1/routes/categories');
+
 describe('Categories Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -7,95 +10,26 @@ describe('Categories Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
-
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-    };
-
     mockBudget = {
       getCategories: vi.fn().mockResolvedValue([
-        {
-          id: 'cat1',
-          name: 'Groceries',
-          group_id: 'grp1',
-          is_income: false,
-        },
+        { id: 'cat1', name: 'Groceries', group_id: 'grp1', is_income: false },
       ]),
-      getCategory: vi.fn().mockResolvedValue({
-        id: 'cat1',
-        name: 'Groceries',
-        group_id: 'grp1',
-        is_income: false,
-      }),
-      createCategory: vi.fn().mockResolvedValue({
-        id: 'new-cat',
-        name: 'New Category',
-      }),
-      updateCategory: vi.fn().mockResolvedValue({
-        id: 'cat1',
-        name: 'Groceries Updated',
-      }),
+      getCategory: vi.fn().mockResolvedValue({ id: 'cat1', name: 'Groceries', group_id: 'grp1', is_income: false }),
+      createCategory: vi.fn().mockResolvedValue({ id: 'new-cat', name: 'New Category' }),
+      updateCategory: vi.fn().mockResolvedValue({ id: 'cat1', name: 'Groceries Updated' }),
       deleteCategory: vi.fn().mockResolvedValue(undefined),
       getCategoryGroups: vi.fn().mockResolvedValue([
-        {
-          id: 'grp1',
-          name: 'Regular Expenses',
-          is_income: false,
-        },
+        { id: 'grp1', name: 'Regular Expenses', is_income: false },
       ]),
-      getCategoryGroup: vi.fn().mockResolvedValue({
-        id: 'grp1',
-        name: 'Regular Expenses',
-        is_income: false,
-      }),
-      createCategoryGroup: vi.fn().mockResolvedValue({
-        id: 'new-grp',
-        name: 'New Group',
-      }),
-      updateCategoryGroup: vi.fn().mockResolvedValue({
-        id: 'grp1',
-        name: 'Updated Group',
-      }),
+      getCategoryGroup: vi.fn().mockResolvedValue({ id: 'grp1', name: 'Regular Expenses', is_income: false }),
+      createCategoryGroup: vi.fn().mockResolvedValue({ id: 'new-grp', name: 'New Group' }),
+      updateCategoryGroup: vi.fn().mockResolvedValue({ id: 'grp1', name: 'Updated Group' }),
       deleteCategoryGroup: vi.fn().mockResolvedValue(undefined),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
-
-    const categoriesModule = require('../../../src/v1/routes/categories');
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
     categoriesModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/categories', () => {

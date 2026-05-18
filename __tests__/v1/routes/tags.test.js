@@ -1,3 +1,6 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const tagsModule = require('../../../src/v1/routes/tags');
+
 describe('Tags Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -7,56 +10,18 @@ describe('Tags Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
-
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-    };
-
     mockBudget = {
       getTags: vi.fn().mockResolvedValue([
-        { id: 'tag1', tag: 'important', color: '#ff0000', description: 'Important tag' }
+        { id: 'tag1', tag: 'important', color: '#ff0000', description: 'Important tag' },
       ]),
-      createTag: vi.fn().mockResolvedValue({
-        id: 'new-tag',
-        tag: 'newtag'
-      }),
+      createTag: vi.fn().mockResolvedValue({ id: 'new-tag', tag: 'newtag' }),
       updateTag: vi.fn().mockResolvedValue(undefined),
       deleteTag: vi.fn().mockResolvedValue(undefined),
     };
 
-    mockReq = {
-      params: {},
-      body: {},
-      query: {}
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget
-      }
-    };
-
-    mockNext = vi.fn();
-
-    const module = require('../../../src/v1/routes/tags');
-    module(mockRouter);
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
+    tagsModule(mockRouter);
   });
 
   describe('GET /budgets/:budgetSyncId/tags', () => {

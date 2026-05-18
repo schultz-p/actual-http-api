@@ -10,8 +10,6 @@ describe('Budget Module', () => {
   let mockArchive;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-
     mockActualApi = {
       loadBudget: vi.fn().mockResolvedValue(undefined),
       sync: vi.fn().mockResolvedValue(undefined),
@@ -121,10 +119,6 @@ describe('Budget Module', () => {
     }));
     vi.spyOn(archiverWrapper, 'createArchive').mockReturnValue(mockArchive);
     vi.spyOn(path, 'join').mockImplementation((...args) => args.join('/'));
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('Budget Initialization', () => {
@@ -844,6 +838,35 @@ describe('Budget Module', () => {
       mockActualApi.addTransactions.mockResolvedValueOnce([]);
       const result = await budget.addTransaction('acc1', { amount: 100 });
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('refreshSyncIdToBudgetIdMap', () => {
+    it('should populate the map when metadata.json exists', async () => {
+      const fs = require('fs');
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(utils, 'getFileContent').mockReturnValue(JSON.stringify({
+        id: 'isolated-budget',
+        groupId: 'isolated-group',
+      }));
+
+      await Budget('unregistered-sync-1', undefined);
+
+      expect(mockActualApi.downloadBudget).toHaveBeenCalledWith('unregistered-sync-1');
+    });
+
+    it('should log an error when directory scanning throws', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      utils.listSubDirectories.mockImplementation(() => {
+        throw new Error('Permission denied');
+      });
+
+      await Budget('unregistered-sync-2', undefined);
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Error creating map from sync id to budget id',
+        'Permission denied'
+      );
     });
   });
 });

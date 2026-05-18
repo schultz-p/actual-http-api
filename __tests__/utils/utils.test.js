@@ -13,11 +13,6 @@ const {
 } = require('../../src/utils/utils');
 
 describe('Utils', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-    vi.clearAllMocks();
-  });
-
   describe('createDirIfDoesNotExist', () => {
     it('should create directory if it does not exist', () => {
       vi.spyOn(fs, 'existsSync').mockReturnValue(false);

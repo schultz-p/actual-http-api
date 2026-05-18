@@ -1,3 +1,6 @@
+const { createMockRouter, createMockReqRes } = require('../../helpers/route-test-helpers');
+const transactionsModule = require('../../../src/v1/routes/transactions');
+
 describe('Transactions Routes', () => {
   let mockRouter;
   let mockBudget;
@@ -7,84 +10,23 @@ describe('Transactions Routes', () => {
   let handlers;
 
   beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
-
-    handlers = {};
-
-    mockRouter = {
-      get: vi.fn((path, handler) => {
-        handlers[`GET ${path}`] = handler;
-      }),
-      post: vi.fn((path, handler) => {
-        handlers[`POST ${path}`] = handler;
-      }),
-      patch: vi.fn((path, handler) => {
-        handlers[`PATCH ${path}`] = handler;
-      }),
-      delete: vi.fn((path, handler) => {
-        handlers[`DELETE ${path}`] = handler;
-      }),
-    };
-
     mockBudget = {
-      getAccount: vi.fn().mockResolvedValue({
-        id: 'acc1',
-        name: 'Checking',
-      }),
+      getAccount: vi.fn().mockResolvedValue({ id: 'acc1', name: 'Checking' }),
       getTransactions: vi.fn().mockResolvedValue([
-        {
-          id: 'txn1',
-          account: 'acc1',
-          date: '2023-08-01',
-          amount: -50,
-          payee: 'Store',
-          cleared: true,
-        },
-        {
-          id: 'txn2',
-          account: 'acc1',
-          date: '2023-08-02',
-          amount: -75,
-          payee: 'Gas Station',
-          cleared: false,
-        },
+        { id: 'txn1', account: 'acc1', date: '2023-08-01', amount: -50, payee: 'Store', cleared: true },
+        { id: 'txn2', account: 'acc1', date: '2023-08-02', amount: -75, payee: 'Gas Station', cleared: false },
       ]),
       addTransaction: vi.fn().mockResolvedValue('ok'),
       addTransactions: vi.fn().mockResolvedValue('ok'),
-      importTransactions: vi.fn().mockResolvedValue({
-        imported: 2,
-      }),
-      updateTransaction: vi.fn().mockResolvedValue({
-        id: 'txn1',
-        amount: -100,
-      }),
+      importTransactions: vi.fn().mockResolvedValue({ imported: 2 }),
+      updateTransaction: vi.fn().mockResolvedValue({ id: 'txn1', amount: -100 }),
       deleteTransaction: vi.fn().mockResolvedValue(undefined),
       deleteTransactions: vi.fn().mockResolvedValue(undefined),
     };
 
-    mockReq = {
-      params: {},
-      query: {},
-      body: {},
-    };
-
-    mockRes = {
-      json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis(),
-      locals: {
-        budget: mockBudget,
-      },
-    };
-
-    mockNext = vi.fn();
-
-    const transactionsModule = require('../../../src/v1/routes/transactions');
+    ({ router: mockRouter, handlers } = createMockRouter());
+    ({ mockReq, mockRes, mockNext } = createMockReqRes(mockBudget));
     transactionsModule(mockRouter);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('GET /budgets/:budgetSyncId/accounts/:accountId/transactions', () => {
