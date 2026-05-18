@@ -178,7 +178,7 @@ module.exports = (router) => {
    *                   date: "2023-06-23"
    *                   cleared: false
    *     responses:
-   *       '200':
+   *       '201':
    *         description: ok
    *         content:
    *           application/json:
@@ -268,7 +268,7 @@ module.exports = (router) => {
    *                   date: "2023-06-23"
    *                   cleared: false
    *     responses:
-   *       '200':
+   *       '201':
    *         description: ok
    *         content:
    *           application/json:

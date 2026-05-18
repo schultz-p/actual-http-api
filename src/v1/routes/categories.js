@@ -121,7 +121,7 @@ module.exports = (router) => {
    *                   hidden: false
    *                   group_id: 'd4394761-0427-4ad4-bde7-9a83e118541a'
    *     responses:
-   *       '201':
+   *       '200':
    *         description: Category id
    *         content:
    *           application/json:
@@ -373,7 +373,7 @@ module.exports = (router) => {
    *                   is_income: false
    *                   hidden: false
    *     responses:
-   *       '201':
+   *       '200':
    *         description: Category group id
    *         content:
    *           application/json:

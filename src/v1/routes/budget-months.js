@@ -68,7 +68,7 @@ const { isEmpty } = require('../../utils/utils');
  *         id:
  *           type: string
  *         name:
- *            type: integer
+ *            type: string
  *         is_income:
  *            type: boolean
  *         hidden:
@@ -98,7 +98,7 @@ const { isEmpty } = require('../../utils/utils');
  *         id:
  *           type: string
  *         name:
- *            type: integer
+ *            type: string
  *         is_income:
  *            type: boolean
  *         hidden:
