@@ -4,7 +4,7 @@ kill_timeout = "5s"
 primary_region = "sea"
 
 [build]
-image = "jhonderson/actual-http-api:26.2.0"
+image = "jhonderson/actual-http-api:26.5.2"
 
 [env]
 ACTUAL_DATA_DIR = "/data"

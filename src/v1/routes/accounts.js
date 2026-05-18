@@ -326,13 +326,19 @@ module.exports = (router) => {
    *                   offbudget: false
    *     responses:
    *       '200':
-   *         description: Account created
+   *         description: Account id
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/GeneralResponseMessage'
+   *               required:
+   *                 - data
+   *               type: object
+   *               properties:
+   *                 data:
+   *                   type: string
+   *                   description: Account id
    *               examples:
-   *                 - message: Account created
+   *                 - data: "671b669d-b616-4bf1-8a04-c82d73f87d5b"
    *       '400':
    *         $ref: '#/components/responses/400'
    *       '404':
